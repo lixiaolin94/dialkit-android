@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Custom accessibility actions. -->
+    <item name="dialkit_action_edit" type="id" />
+    <item name="dialkit_action_reset" type="id" />
+    <item name="dialkit_action_left" type="id" />
+    <item name="dialkit_action_right" type="id" />
+    <item name="dialkit_action_up" type="id" />
+    <item name="dialkit_action_down" type="id" />
+</resources>

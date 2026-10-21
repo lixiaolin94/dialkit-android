@@ -1,0 +1,6 @@
+# JitPack builds a tag the first time someone asks for it: https://jitpack.io/#lixiaolin94/dialkit-android
+# Artifacts are published as com.github.lixiaolin94.dialkit-android:<module>:<tag>, unsigned.
+jdk:
+  - openjdk17
+install:
+  - ./gradlew :dialkit:publishToMavenLocal :dialkit-noop:publishToMavenLocal :dialkit-compose:publishToMavenLocal -PsignAllPublications=false -PGROUP=com.github.lixiaolin94.dialkit-android -PVERSION_NAME=$VERSION

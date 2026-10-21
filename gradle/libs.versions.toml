@@ -1,0 +1,40 @@
+# Toolchain (build-only): whatever is newest in the local Gradle cache.
+# Consumer-facing floor (what the AARs ask of their host): minSdk 23, Kotlin metadata 2.0, stdlib 2.1;
+# dialkit-compose only: Compose 1.7 (BOM 2024.12.01). See docs/DESIGN.md.
+[versions]
+agp = "9.2.1"
+kotlin = "2.2.21"
+kotlinStdlib = "2.1.21"
+composeBom = "2024.12.01"
+lifecycle = "2.6.1"
+activityCompose = "1.9.3"
+junit = "4.13.2"
+orgJson = "20240303"
+androidxTestRunner = "1.7.0"
+mavenPublish = "0.37.0"
+
+[libraries]
+kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinStdlib" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+androidx-compose-animation-core = { group = "androidx.compose.animation", name = "animation-core" }
+androidx-lifecycle-common = { group = "androidx.lifecycle", name = "lifecycle-common", version.ref = "lifecycle" }
+androidx-annotation = { group = "androidx.annotation", name = "annotation", version = "1.8.0" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+org-json = { group = "org.json", name = "json", version.ref = "orgJson" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
+
+# build-logic
+android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
+# Convention plugin from build-logic/: shared Android, Kotlin and lint setup of the three library modules.
+dialkit-library = { id = "dialkit.android.library" }

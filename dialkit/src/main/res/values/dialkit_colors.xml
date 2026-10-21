@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DialKit design tokens, light theme.
+  SOURCE DialKit styles.css .dialkit-root[data-theme="light"] (L1761); viz strokes L1790.
+  Hosts may override any of these by redefining the same name in their own resources.
+-->
+<resources>
+    <color name="dialkit_surface">#0A000000</color>
+    <color name="dialkit_surface_hover">#14000000</color>
+    <color name="dialkit_surface_active">#1A000000</color>
+    <color name="dialkit_surface_subtle">#0F000000</color>
+    <color name="dialkit_text_root">#FF000000</color>
+    <color name="dialkit_text_section">#A6000000</color>
+    <color name="dialkit_text_label">#99000000</color>
+    <color name="dialkit_text_focus">#FF000000</color>
+    <color name="dialkit_text_primary">#E6000000</color>
+    <color name="dialkit_text_secondary">#8C000000</color>
+    <color name="dialkit_text_tertiary">#59000000</color>
+    <color name="dialkit_border">#1A000000</color>
+    <color name="dialkit_border_hover">#26000000</color>
+    <color name="dialkit_glass_bg">#FFFAFAFA</color>
+    <color name="dialkit_dropdown_bg">#FFFFFFFF</color>
+    <color name="dialkit_viz_grid">#14000000</color>
+    <color name="dialkit_viz_midline">#26000000</color>
+    <color name="dialkit_viz_curve">#80000000</color>
+
+    <!-- Mode-independent colours. -->
+    <color name="dialkit_error">#FFEF7777</color> <!-- SOURCE styles.css L1396 -->
+    <color name="dialkit_grabber">#998E8E93</color> <!-- DESIGN: neutral gray at 60%, drawn on the host, readable on light and dark -->
+    <color name="dialkit_checker_dark">#FFAAAAAA</color> <!-- SOURCE repeating-conic-gradient(#aaa 0% 25%, #eee 0% 50%) -->
+    <color name="dialkit_checker_light">#FFEEEEEE</color>
+    <color name="dialkit_thumb">#FFFFFFFF</color> <!-- SOURCE colour-picker thumbs and pad point -->
+</resources>

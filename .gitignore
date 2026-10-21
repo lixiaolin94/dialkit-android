@@ -1,0 +1,10 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.kotlin/
+.DS_Store
+
+# Local DialKit source (and other ports) for comparison; never committed.
+/reference/

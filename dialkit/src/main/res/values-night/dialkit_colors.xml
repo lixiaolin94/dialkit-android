@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DialKit design tokens, dark theme (DialKit's base).
+  SOURCE DialKit styles.css .dialkit-root (L4).
+  Hosts may override any of these by redefining the same name in their own resources.
+-->
+<resources>
+    <color name="dialkit_surface">#0DFFFFFF</color>
+    <color name="dialkit_surface_hover">#1AFFFFFF</color>
+    <color name="dialkit_surface_active">#1CFFFFFF</color>
+    <color name="dialkit_surface_subtle">#0FFFFFFF</color>
+    <color name="dialkit_text_root">#FFFFFFFF</color>
+    <color name="dialkit_text_section">#B2FFFFFF</color>
+    <color name="dialkit_text_label">#B2FFFFFF</color>
+    <color name="dialkit_text_focus">#FFFFFFFF</color>
+    <color name="dialkit_text_primary">#F2FFFFFF</color>
+    <color name="dialkit_text_secondary">#99FFFFFF</color>
+    <color name="dialkit_text_tertiary">#66FFFFFF</color>
+    <color name="dialkit_border">#1AFFFFFF</color>
+    <color name="dialkit_border_hover">#26FFFFFF</color>
+    <color name="dialkit_glass_bg">#FF212121</color>
+    <color name="dialkit_dropdown_bg">#FF2A2A2A</color>
+    <color name="dialkit_viz_grid">#14FFFFFF</color>
+    <color name="dialkit_viz_midline">#26FFFFFF</color>
+    <color name="dialkit_viz_curve">#99FFFFFF</color>
+</resources>

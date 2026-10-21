@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Panel wording follows DialKit (SOURCE components/*.tsx); Import strings are DESIGN. -->
+<resources>
+    <string name="dialkit_name" translatable="false">DialKit</string>
+    <string name="dialkit_close">Close</string>
+    <string name="dialkit_empty">No dials registered on this screen.</string>
+
+    <!-- Versions. "Version N" is also the persisted preset name (DialKit's format), so it is not translated. -->
+    <string name="dialkit_version_base" translatable="false">Version 1</string>
+    <string name="dialkit_version_new">New version</string>
+
+    <string name="dialkit_copy">Copy parameters</string>
+    <string name="dialkit_copied">Copied</string>
+
+    <string name="dialkit_import">Import parameters</string>
+    <string name="dialkit_import_clipboard">Paste from clipboard</string>
+    <string name="dialkit_import_file">Import from file…</string>
+    <string name="dialkit_source_clipboard">clipboard</string>
+    <string name="dialkit_source_file">file</string>
+    <string name="dialkit_source_adb">adb</string>
+    <string name="dialkit_import_no_panel">DialKit: no panel to import into</string>
+    <string name="dialkit_import_no_picker">DialKit: no file picker on this device</string>
+    <string name="dialkit_import_empty">DialKit: %1$s is empty</string>
+    <string name="dialkit_import_no_json">DialKit: no JSON found in %1$s</string>
+    <string name="dialkit_import_no_match">DialKit: no values in %1$s match “%2$s”</string>
+    <plurals name="dialkit_import_done">
+        <item quantity="one">Imported %1$d value as %2$s</item>
+        <item quantity="other">Imported %1$d values as %2$s</item>
+    </plurals>
+    <plurals name="dialkit_import_ignored">
+        <item quantity="one">%1$s · %2$d ignored</item>
+        <item quantity="other">%1$s · %2$d ignored</item>
+    </plurals>
+
+    <string name="dialkit_off">Off</string>
+    <string name="dialkit_on">On</string>
+
+    <string name="dialkit_type">Type</string>
+    <string name="dialkit_mode_easing">Easing</string>
+    <string name="dialkit_mode_time">Time</string>
+    <string name="dialkit_mode_physics">Physics</string>
+    <string name="dialkit_ease">Ease</string>
+    <string name="dialkit_duration">Duration</string>
+    <string name="dialkit_bounce">Bounce</string>
+    <string name="dialkit_stiffness">Stiffness</string>
+    <string name="dialkit_damping">Damping</string>
+    <string name="dialkit_mass">Mass</string>
+
+    <string name="dialkit_format_hex">Hex</string>
+    <string name="dialkit_format_oklch">OKLCH</string>
+    <string name="dialkit_format_p3">Display P3</string>
+    <string name="dialkit_hue">Hue</string>
+    <string name="dialkit_opacity">Opacity</string>
+
+    <!-- Image control. SOURCE image-control.ts wording. -->
+    <string name="dialkit_image_none">No image</string>
+    <string name="dialkit_image_uploaded">Uploaded image</string>
+    <string name="dialkit_image_choose">Choose %1$s image: %2$s</string>
+    <string name="dialkit_image_remove">Remove</string>
+    <string name="dialkit_image_remove_desc">Remove %1$s image</string>
+    <string name="dialkit_image_empty">Choose an image to get started.</string>
+    <string name="dialkit_image_upload">Upload image</string>
+    <string name="dialkit_image_loading">Loading image…</string>
+    <string name="dialkit_image_too_large">Choose an image smaller than 10 MB.</string>
+    <string name="dialkit_image_not_image">Choose an image file, such as PNG, JPG, WebP or GIF.</string>
+    <string name="dialkit_image_unreadable">This image could not be opened. Try another file.</string>
+    <string name="dialkit_image_no_picker">No photo picker on this device.</string>
+
+    <!-- Accessibility. -->
+    <string name="dialkit_edit_value">Edit value</string>
+    <string name="dialkit_value_of">%1$s value</string> <!-- SOURCE aria-label `${label} value` -->
+    <string name="dialkit_reset">Reset</string>
+    <string name="dialkit_move_left">Move left</string>
+    <string name="dialkit_move_right">Move right</string>
+    <string name="dialkit_move_up">Move up</string>
+    <string name="dialkit_move_down">Move down</string>
+    <string name="dialkit_select_option">Select %1$s</string>
+    <string name="dialkit_color_format">Color format</string>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Installs DialKit in debuggable builds. Remove with tools:node="remove" to install manually. -->
+        <provider
+            android:name="io.github.lixiaolin94.dialkit.DialKitInitProvider"
+            android:authorities="${applicationId}.dialkit-init"
+            android:exported="false"
+            android:initOrder="100" />
+        <!-- Import from file: a translucent trampoline for the system document picker (no storage permission). -->
+        <activity
+            android:name="io.github.lixiaolin94.dialkit.store.DialKitPickerActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+    </application>
+</manifest>

@@ -39,9 +39,9 @@ DialKit 里**没有**、因此本项目全部是 `DESIGN` 的：面板最小高�
 |---|---|
 | 构建工具链 | AGP 9.2.1 · Gradle 9.5.0 · Kotlin 2.2.21（取本机 Gradle 缓存里已有的版本） |
 | `dialkit` / `dialkit-noop` 对宿主的要求 | minSdk 23 · `minCompileSdk` 33 · Kotlin metadata 2.0（`languageVersion`/`apiVersion` 2.0）· kotlin-stdlib 2.1.21（`kotlin.stdlib.default.dependency=false` 后显式声明）· Java 11 字节码 |
-| `dialkit-compose` 额外要求 | Compose BOM 2024.12.01（Compose 1.7），以 `api(platform)` 导出 |
+| `dialkit-compose` 额外要求 | Compose BOM 2024.12.01（Compose 1.7），以 `api(platform)` 导出；依赖 runtime、animation-core，以及 ui（`DialKitPanel` 用到 `AndroidView`，implementation） |
 
-minSdk 取自本机 Android 项目的最低值（o-motion samples 为 23）；Compose 下限取自 appstore-demo / pomodoro-demo 等模板使用的 BOM 2024.12.01。
+minSdk 23 与 Compose BOM 2024.12.01 是有意选的低下限：覆盖仍在维护的老 Demo 工程，同时用得到需要的平台 API（`getRootWindowInsets` 等）。
 
 依赖：
 
@@ -64,13 +64,13 @@ minSdk 取自本机 Android 项目的最低值（o-motion samples 为 23）；Co
 ### 3.2 实现要点
 
 ```
-DialKitInitProvider（ContentProvider，仅 debuggable 包生效）
- └─ DialKit.install
-     ├─ ActivityTracker（ActivityLifecycleCallbacks）
+DialKitInitProvider（ContentProvider）
+ ├─ DialStore.init（所有构建：进程单例，所有值和版本都在这里，Activity 切换和重建不丢）
+ └─ DialKit.install（仅 debuggable 包）
+     ├─ ActivityTracker（ActivityLifecycleCallbacks；floatingPanel = false 时什么都不挂）
      │    onActivityResumed  → ActivityAttachment.attach()   // 幂等
      │    onActivityDestroyed→ detach()
-     ├─ adb 广播接收器
-     └─ DialStore（进程单例，所有值和版本都在这里，Activity 切换和重建不丢）
+     └─ adb 广播接收器
 
 attach(activity):
   1. 包装 window.callback → OverlayWindowCallback   // 手势识别、快捷键、返回键
@@ -201,8 +201,6 @@ DialKit.configure {
 - 标题 15sp/600；关闭按钮 16dp，点它收回到入口（`contentDescription = "Close"`）。
 - 拖拽示意点阵（`PanelView.kt` 的 `DragGrip`，参数都是其中的常量）：以 Leva 0.10.1 标题栏把手为起点（`SOURCE` leva.esm.js L1938–1970：20×10 的 SVG、viewBox 28×14、r=2，换算后点径 2.86dp、间距 8.57×7.14dp），再按作者目测调整（`DESIGN (user)`）：4 列 2 行，间距各减 2dp（6.57×5.14dp）。颜色用 text-tertiary。
 - 标题的最大宽度限制在点阵左侧，过长时以省略号结尾。
-
----
 
 ### 5.6 页面内面板（`DialPanelView` / `DialKitPanel`）
 
@@ -357,7 +355,7 @@ class CardDials : DialGroup() {
 | Folder | 标题行高 36，13sp/600、letter-spacing −0.01em。chevron 展开时旋转 180°，spring(0.35, 0.15)；内容高度 0↔auto，spring(0.35, 0.1)；内容区 gap 6、padding-bottom 10。 |
 | Toolbar | 高 36、gap 6：版本下拉（flex 1）、Import（surface 底）、Copy（36×36 反色，"已复制"态保持 1500ms）。版本菜单：dropdown-bg、圆角 12、项高 32、圆角 8，分隔线上下 4；删除按钮常显（不透明度 .6，触屏没有 hover，`DESIGN`）。 |
 | 滚动区 | 平台 ScrollView，不显示滚动条；还有内容可滚的那一侧用平台 fading edge 渐隐 16dp（`DESIGN (user)`，DialKit 没有）。 |
-| 弹层通用 | 画在浮层内部最上层（`translationZ` 64dp），不是独立窗口。卡片先整块填充，再在内侧画 1dp 边框（`SOURCE` `border: 1px solid var(--dial-border)`）。 |
+| 弹层通用 | 悬浮面板的弹层画在浮层内部最上层，页面内面板的画在挂到 DecorView 的 `EmbeddedPopupHost` 里（都是 `translationZ` 64dp），不是独立窗口。卡片先整块填充，再在内侧画 1dp 边框（`SOURCE` `border: 1px solid var(--dial-border)`）。 |
 
 **spring 记法**：spring(a, b) 两个参数是 (visualDuration, bounce)；三个参数是 (stiffness, damping, mass)，都按 §6.4 的公式换算。
 
@@ -436,6 +434,7 @@ class CardDials : DialGroup() {
 - 弹层打开时 Back / Escape 先关弹层；从键盘打开弹层时焦点移进弹层。
 - 形变、拖动、调高结束时发出 `TYPE_WINDOW_CONTENT_CHANGED`，读屏软件和 UI 自动化才能拿到最新结构。
 - `samples/compose/src/androidTest` 的 `OverlayAccessibilityTest` 用 UiAutomation 按读屏的方式找节点、执行动作、检查状态。
+- `dialkit/src/androidTest`（10 个）覆盖需要 Android 的部分：DialStore 的引用计数、保留与持久化，页面内面板的嵌入、弹层与返回键，`floatingPanel = false`。运行方法见 CONTRIBUTING.md。
 
 ---
 
@@ -448,11 +447,16 @@ dialkit-android/
 │  ├─ src/shared/       # 与 noop 共用：DialGroup DSL、DialCell、节点、类型、model/（数值、颜色、曲线、Pad、JSON、导入）
 │  ├─ src/main/java/    # DialKit 入口、初始化、store/（DialStore、导入 Activity）、overlay/（注入、手势、返回键）、ui/（全部 View）
 │  ├─ src/main/res/     # drawable/ 矢量图标，values(-night)/ 颜色 token，values/ 文案；全部以 dialkit_ 为前缀
-│  └─ src/test/         # JVM 单元测试
-├─ dialkit-noop/        # 同包名同 API 的空实现，共用 dialkit/src/shared
-├─ dialkit-compose/     # rememberDialKit、toAnimationSpec()、DialCell → Compose 状态桥接；对核心库 compileOnly
+│  ├─ src/test/         # JVM 单元测试
+│  └─ src/androidTest/  # 设备端测试（store、页面内面板、floatingPanel）
+├─ dialkit-noop/        # 同包名同 API 的空实现（含空的 DialPanelView），共用 dialkit/src/shared
+├─ dialkit-compose/     # rememberDialKit、toAnimationSpec()、DialKitPanel、DialCell → Compose 状态桥接；对核心库 compileOnly
+├─ samples/catalog/     # 每个控件与面板功能一屏，含页面内面板（Compose 页面与 View 页面）
+├─ samples/embedded/    # 没有悬浮面板的 App：floatingPanel = false，在 App 自己的页面里调参
 ├─ samples/compose/     # Compose 宿主：验证点击、双指缩放、滚动穿透
 ├─ samples/views/       # 普通 android.app.Activity + View 宿主；measure 构建类型用来测体积
+├─ scripts/             # set-version.py（发版改版本号）、check-commits.py（提交信息校验）
+├─ docs/                # DESIGN、WEB_PARITY、RELEASING
 └─ reference/           # 本地的 DialKit 源码（git 忽略，不进仓库）
 ```
 
@@ -460,14 +464,16 @@ dialkit-android/
 - 主代码开启 `-Xexplicit-api=strict`；Lint 对三个库模块零告警。
 - **资源**：图标是 `res/drawable/dialkit_ic_*.xml` 的 VectorDrawable（路径取自 DialKit icons.ts，文件头注明来源），由 `IconView`（ImageView）着色；颜色 token 在 `res/values/dialkit_colors.xml`（浅色）与 `res/values-night/`（深色），`DialTheme.Light / Dark` 通过配置上下文强制选择其一，宿主可以覆盖同名资源换肤；文案在 `res/values/dialkit_strings.xml`，可本地化。
 - **项目内小组件**（`ui/`）：`SliderView`、`SegmentedView`、`ValueField`、`ToolbarButton`、`DialMenu`、`PressFrame`、`IconView`、`RadialShadow`，以及 `labeledRow` 等行构建函数；工具栏和弹层都由它们组合。
-- **发布**：com.vanniktech.maven.publish 发布到 Maven Central（Central Portal），POM 信息在根目录与各模块的 `gradle.properties`；凭据和签名密钥只从 `~/.gradle/gradle.properties` 或环境变量读取。流程见 CONTRIBUTING.md。
+- **发布**：通过 JitPack 发布（推送 tag 即发版，`jitpack.yml` 指定构建命令）；Maven Central 是可选路线，用 com.vanniktech.maven.publish，POM 信息在根目录与各模块的 `gradle.properties`，凭据和签名密钥只从 `~/.gradle/gradle.properties` 或环境变量读取。流程见 [RELEASING.md](RELEASING.md)。
 - 体积（`samples/views`，纯 View 应用，release + R8，关闭混淆以便按包统计）：
 
 | | 大小 |
 |---|---|
-| APK | 121 KB |
-| DialKit 的 dex | 84 KB，不带任何 androidx 或协程 |
-| release 包换成 noop 后的整个 APK | 42 KB |
+| APK | 137 KB |
+| DialKit 的 dex | 92 KB，不带任何 androidx 或协程 |
+| release 包换成 noop 后的整个 APK | 45 KB |
+
+（0.0.2 前重新测量：`./gradlew :samples:views:assembleMeasure`，`apkanalyzer dex packages` 中 `io.github.lixiaolin94.dialkit` 减去示例自身的包。0.0.1 时为 121 / 84 / 42 KB，增量来自页面内面板、值校验与 dump。）
 
 接入方式见 [README](../README.md)。
 
@@ -475,7 +481,8 @@ dialkit-android/
 
 ## 10. 未做与已知限制
 
-- 宿主的 Dialog、BottomSheet、Popup 是独立窗口，会盖住面板。
+- 宿主的 Dialog、BottomSheet、Popup 是独立窗口，会盖住悬浮面板。
+- 页面内面板放在 `LazyColumn` 里、滚出屏幕足够远时会被销毁，分组暂时回到悬浮面板；网页版 inline 的标题栏在宿主滚动时吸顶，这里不吸顶。
 - 与网页版的功能差异及处理建议见 [WEB_PARITY.md](WEB_PARITY.md)。
 - 数值字体用系统 monospace，没有 500 字重，笔画比 DialKit 的 Geist Mono 细。
 - 没在 API 23/24 实机或模拟器上跑过；没用 AGP 8.7 + Kotlin 2.1 的宿主实际消费构建过。

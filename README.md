@@ -225,7 +225,9 @@ Column(Modifier.verticalScroll(rememberScrollState())) {
 - With a wrap-content height it grows with its controls and your page scrolls them; with a fixed or `match_parent` height the header stays and the controls scroll inside.
 - Pickers and menus float above the page, and Back closes an open one first.
 - While the view is on screen, its group is left out of the floating panel (other groups stay there), `getOpen()` is `true` and `setOpen()` does nothing.
-- It works in any build type that uses the full `dialkit` artifact; the floating overlay still installs only in debuggable builds. With `dialkit-noop` it draws nothing.
+- Pick the dependency by what the screen is for:
+  - **A debug tool** that must not ship: keep `debugImplementation(dialkit)` / `releaseImplementation(dialkit-noop)`. In release the view draws nothing and every dial returns its default.
+  - **A feature of the app**, such as a tuning screen in an internal or demo build: depend on `implementation("…:dialkit")` for every build type. The in-page panel works in any build type; the floating overlay still installs only in debuggable builds, and `floatingPanel = false` turns it off there too.
 - For an app that tunes only in its own screens, turn the floating panel off entirely with `DialKit.configure { floatingPanel = false }` (see [`samples/embedded`](samples/embedded)): nothing is added to your Activities, and the gesture, shortcut and adb `toggle` do nothing; adb `dump` and `import` still work.
 - In a `LazyColumn`, an item scrolled far enough away is disposed, and the group returns to the floating panel until it comes back; use a plain scrolling `Column` to keep it.
 
@@ -275,7 +277,7 @@ To install manually, remove `io.github.lixiaolin94.dialkit.DialKitInitProvider` 
 | Sample | What it shows |
 |---|---|
 | [`samples/catalog`](samples/catalog) | Every control and panel feature, one screen each, including panels in a Compose and a Views page |
-| [`samples/embedded`](samples/embedded) | An app with no floating panel (`floatingPanel = false`): the dials are tuned on its own Compose and Views screens |
+| [`samples/embedded`](samples/embedded) | An app with no floating panel (`floatingPanel = false`) whose Tuning screens are a feature, kept in release: the full `dialkit` in every build type |
 | [`samples/compose`](samples/compose) | A Compose host with a single playground panel |
 | [`samples/views`](samples/views) | A plain `android.app.Activity` with View-based observation |
 

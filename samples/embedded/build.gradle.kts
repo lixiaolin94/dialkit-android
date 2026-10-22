@@ -16,7 +16,7 @@ android {
     }
 
     buildTypes {
-        // Installable release (debug key): the same screens on dialkit-noop, where the tuning screens are empty.
+        // Installable release (debug key). The tuning screens are part of this app, so release keeps them.
         release {
             signingConfig = signingConfigs.getByName("debug")
         }
@@ -34,8 +34,9 @@ android {
 
 dependencies {
     implementation(project(":dialkit-compose"))
-    debugImplementation(project(":dialkit"))
-    releaseImplementation(project(":dialkit-noop"))
+    // Tuning is a feature of this app, not a debug tool: the full library in every build type. With
+    // floatingPanel = false nothing floats in release either; only the app's own Tuning screens show panels.
+    implementation(project(":dialkit"))
     implementation(libs.kotlin.stdlib)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.foundation)

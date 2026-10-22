@@ -100,6 +100,7 @@ public object DialKit {
         onAction: ((path: String) -> Unit)? = null,
         factory: () -> G,
     ): G {
+        DialStore.ensureInit(activity) // a host that removed the init provider and never called install()
         val registration = register(name, id, defaultCollapsed, persist, onAction, factory)
         ActivityDisposer.onDestroy(activity) { registration.release() }
         return registration.group

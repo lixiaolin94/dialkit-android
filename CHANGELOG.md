@@ -18,6 +18,8 @@ All notable changes to this project are documented here. The format follows
   shrinks the panel.
 
 ### Fixed
+- In builds that are not debuggable, groups now load their persisted values and versions (storage used to start
+  only with the overlay, after groups had registered).
 - Values from persistence, versions, Import, adb or `setValues` can no longer crash the host: non-finite numbers and
   invalid curves (negative durations, non-positive stiffness or mass, negative damping, bezier x outside 0..1) are
   ignored or clamped, and Import reports them as ignored.

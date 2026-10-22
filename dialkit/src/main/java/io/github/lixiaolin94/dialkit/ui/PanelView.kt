@@ -113,7 +113,11 @@ internal class PanelView(private val ui: DialUi) : LinearLayout(ui.context) {
         } ?: toolbarSlot.setPadding(0, 0, 0, 0)
         content.removeAllViews()
         val view: View = when (panels.size) {
-            0 -> label(context, context.getString(R.string.dialkit_empty), p.textTertiary).apply { setPadding(0, dp(8), 0, dp(8)) }
+            0 -> {
+                // DESIGN: when every registered group is shown inside the page, say so rather than "none registered".
+                val text = if (DialStore.panels.peek.isEmpty()) R.string.dialkit_empty else R.string.dialkit_empty_in_page
+                label(context, context.getString(text), p.textTertiary).apply { setPadding(0, dp(8), 0, dp(8)) }
+            }
             1 -> panels.single().let { panel -> ControlList(ui.withActions(panel), panel.group, isRoot = true) }
             else -> LinearLayout(context).apply {
                 orientation = VERTICAL

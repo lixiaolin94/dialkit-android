@@ -39,12 +39,19 @@ Maven Central remains possible later, with the `io.github.lixiaolin94` coordinat
 
 ### 1. Prepare the version
 
-1. Set `VERSION_NAME` in [`gradle.properties`](../gradle.properties), and `versionName` in
-   `samples/*/build.gradle.kts`, to the new version.
-2. Update the dependency snippets in [`README.md`](../README.md) and [`README.zh-CN.md`](../README.zh-CN.md).
-3. In [`CHANGELOG.md`](../CHANGELOG.md), move the entries under `## [Unreleased]` into a new
-   `## [<version>] - <date>` section.
-4. Commit on `main` and push. Wait for the CI workflow to pass at
+1. Set the version everywhere it is written:
+
+   ```bash
+   scripts/set-version.py 0.0.2 --dry-run   # what would change
+   scripts/set-version.py 0.0.2
+   ```
+
+   It sets `VERSION_NAME` in [`gradle.properties`](../gradle.properties) and `versionName` in
+   `samples/*/build.gradle.kts`, updates the dependency coordinates in [`README.md`](../README.md) and
+   [`README.zh-CN.md`](../README.zh-CN.md), and moves the [`CHANGELOG.md`](../CHANGELOG.md) entries under
+   `## [Unreleased]` into `## [<version>] - <today>`. It neither commits nor tags. Do this only right before the
+   tag: until the version is on JitPack, the README would point at coordinates that do not resolve.
+2. Review with `git diff`, commit on `main` and push. Wait for the CI workflow to pass at
    <https://github.com/lixiaolin94/dialkit-android/actions>.
 
 ### 2. Verify locally

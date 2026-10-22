@@ -16,7 +16,7 @@ jobs:
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
       - name: Test, lint and build
-        run: ./gradlew :dialkit:testDebugUnitTest :dialkit:lintRelease :dialkit-noop:lintRelease :dialkit-compose:lintRelease assembleRelease :samples:views:assembleMeasure :dialkit:assembleDebugAndroidTest publishToMavenLocal -PsignAllPublications=false
+        run: ./gradlew :dialkit:testDebugUnitTest :dialkit:lintRelease :dialkit-noop:lintRelease :dialkit-compose:lintRelease assembleRelease :samples:views:assembleMeasure :dialkit:assembleDebugAndroidTest :samples:compose:assembleDebugAndroidTest publishToMavenLocal -PsignAllPublications=false
 
   commits:
     runs-on: ubuntu-latest

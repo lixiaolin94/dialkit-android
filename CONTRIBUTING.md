@@ -22,7 +22,7 @@ Requirements: JDK 17 and the Android SDK (compileSdk 35).
 ```bash
 ./gradlew :dialkit:testDebugUnitTest     # JVM unit tests (maths, DSL, import, validation)
 ./gradlew :dialkit:lintRelease :dialkit-noop:lintRelease :dialkit-compose:lintRelease   # lint, library modules
-./gradlew assembleDebug assembleRelease  # everything, as CI does
+./gradlew assembleDebug assembleRelease  # every module (CI also runs lint and compiles the device tests)
 ```
 
 Samples: `samples/catalog` (every control and panel feature, one screen each), `samples/embedded` (no floating panel:
@@ -80,7 +80,8 @@ what DialKit adds to an APK (`apkanalyzer dex packages`).
 
 - **A fix comes with a test** that fails without it, unless the bug is purely visual.
 - **UI changes are checked on a device**, with screenshots in the pull request.
-- CI runs unit tests, lint, every module's build and compiles the device tests; it does not run them.
+- CI runs unit tests, lint and every module's build, and compiles both device test suites (`dialkit` and
+  `samples/compose`); it does not run them.
 
 ## Commits
 

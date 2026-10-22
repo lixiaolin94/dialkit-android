@@ -6,14 +6,11 @@ import android.view.KeyEvent
 import android.os.Bundle
 import io.github.lixiaolin94.dialkit.R
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Canvas
 import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Path
-import android.graphics.RadialGradient
 import android.graphics.RectF
-import android.graphics.Shader
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity

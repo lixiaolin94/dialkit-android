@@ -1,6 +1,5 @@
 package io.github.lixiaolin94.dialkit
 
-import io.github.lixiaolin94.dialkit.R
 import android.app.Activity
 import android.app.Application
 import android.content.BroadcastReceiver
@@ -29,7 +28,8 @@ import io.github.lixiaolin94.dialkit.ui.Haptics
  *
  * Show/hide the entry button with the configured gesture (three-finger double tap), the keyboard shortcut,
  * or `adb shell am broadcast -a <applicationId>.dialkit.TOGGLE -p <applicationId>` (extra `cmd`:
- * toggle | show | hide | open | close | import, the last with `--es json '<DialKit JSON>'`).
+ * toggle | show | hide | open | close | import | dump; import takes `--es json '<DialKit JSON>'`, import and dump an
+ * optional `--es id <panel id>`). The adb commands exist only where the overlay is installed (debuggable builds).
  */
 public object DialKit {
     internal val config = DialKitConfig()

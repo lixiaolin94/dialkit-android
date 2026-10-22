@@ -11,9 +11,8 @@ import io.github.lixiaolin94.dialkit.store.DialStore
 /**
  * Auto-install hook, merged into the host manifest. Storage is set up in every build, so persisted values and
  * versions load wherever groups register (in-page panels work in release builds too); only debuggable apps get
- * the overlay. Remove it with
- * `tools:node="remove"` to call [DialKit.install] yourself. A plain ContentProvider instead of
- * androidx.startup keeps DialKit free of AndroidX dependencies.
+ * the overlay. Remove it with `tools:node="remove"` to call [DialKit.install] yourself. A plain ContentProvider
+ * instead of androidx.startup keeps DialKit free of AndroidX dependencies.
  */
 public class DialKitInitProvider : ContentProvider() {
     override fun onCreate(): Boolean {

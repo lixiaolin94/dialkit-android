@@ -14,7 +14,6 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
-import androidx.annotation.DrawableRes
 import io.github.lixiaolin94.dialkit.ActionNode
 import io.github.lixiaolin94.dialkit.store.DialKitPickerActivity
 import io.github.lixiaolin94.dialkit.store.DialPanel

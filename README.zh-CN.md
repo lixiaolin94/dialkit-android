@@ -164,6 +164,7 @@ dials.observe(this) { d ->
 | 版本 | 工具栏左侧的菜单："Version 1" 是基础值，"New version" 把当前值另存为新版本 |
 | Copy | 把参数复制成 DialKit JSON，外加 Kotlin 声明；同时输出到 `adb logcat -s DialKit` |
 | Import | 从剪贴板或文件粘贴 DialKit JSON，导入的值会存成一个新版本。adb 方式：在上面的广播后加 `--es cmd import --es json '<JSON>'` |
+| 在电脑上读出当前值 | 在上面的广播后加 `--es cmd dump`，再运行 `adb logcat -d -v raw -s DialKit`：内容和 Copy 一样，包含所有已注册的面板（加 `--es id <id>` 只输出一个） |
 
 一个页面上注册了多个分组时，面板里每个分组是一个分区。入口会记住自己是否显示，重启应用后保持原状。
 
@@ -173,6 +174,7 @@ dials.observe(this) { d ->
 
 1. 在真机上调到满意为止。
 2. 点 **Copy**。剪贴板里（以及 `adb logcat -s DialKit`）会有 DialKit JSON，后面跟着用新默认值写好的 Kotlin 声明，例如 `val radius by slider(32f, 0f..64f, step = 1f)`。
+   不想碰手机的话，在 adb 广播后加 `--es cmd dump`，同样的文本会输出到 logcat，编码 agent 也能直接读到这些值。
 3. 把这些声明粘贴到你的 `DialGroup` 里，覆盖原来的写法。调好的值就成了默认值，release 包（`dialkit-noop`）出来的效果和你调的一模一样。
 
 这份 JSON 和网页版 DialKit 的格式一致：可以粘贴进网页原型，也可以把网页版导出的 JSON 在真机上 Import 进来。
@@ -208,9 +210,9 @@ val dials = rememberDialKit("Card", onAction = { path -> if (path == "reset") lo
 ```kotlin
 DialKit.configure {
     entryVisibleByDefault = true                            // 首次启动就显示入口，不用手势
+    entryButton = false                                     // 不显示入口按钮：用 DialKit.open() / setOpen(true) 打开
     toggleGesture = ToggleGesture.ThreeFingerLongPress()    // 或 ToggleGesture.None
     keyShortcut = null                                      // 关闭 Ctrl+Shift+D
-    entryButton = false                                     // 不显示入口按钮：用 DialKit.open() / setOpen(true) 打开
     entryPosition = DialPosition.BottomEnd                  // 入口首次出现的位置（默认 TopEnd）
     defaultOpen = true                                      // 入口可见时，启动就展开面板
     theme = DialTheme.Dark                                  // 默认跟随系统
@@ -233,10 +235,10 @@ DialKit.configure {
 | `Could not find com.github.lixiaolin94…` | 在 `dependencyResolutionManagement.repositories` 里加上 `maven("https://jitpack.io")`。 |
 | 重启应用后参数恢复了默认 | 这是默认行为；需要保留就传 `persist = DialPersist()`。 |
 | release 包里没有面板 | 正常：release 用的是 `dialkit-noop`，参数返回默认值。 |
+| 创建分组时抛 `IllegalArgumentException` | 某个声明的参数不成立：滑杆需要有限数、`min < max`、步长大于 0；缓动需要时长 ≥ 0、x1 和 x2 在 0..1 之间；弹簧需要正的时长，或者刚度和质量大于 0、阻尼 ≥ 0。 |
 
 ## 模块、示例与文档
 
-| 创建分组时抛 `IllegalArgumentException` | 某个声明的参数不成立：滑杆需要有限数、`min < max`、步长大于 0；缓动需要时长 ≥ 0、x1 和 x2 在 0..1 之间；弹簧需要正的时长，或者刚度和质量大于 0、阻尼 ≥ 0。 |
 | 构件 | 内容 | 运行时依赖 |
 |---|---|---|
 | `dialkit` | DSL、浮层、手势、全部 UI、持久化 | kotlin-stdlib |

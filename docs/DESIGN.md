@@ -128,7 +128,8 @@ DialKit.configure {
 }
 ```
 
-- **adb**：`adb shell am broadcast -a <applicationId>.dialkit.TOGGLE -p <applicationId> --es cmd <toggle|show|hide|open|close|import>`。`import` 另带 `--es json '<JSON>'`，可选 `--es id <面板 id>`。广播接收器在 API 33+ 以 `RECEIVER_EXPORTED` 注册。
+- **adb**：`adb shell am broadcast -a <applicationId>.dialkit.TOGGLE -p <applicationId> --es cmd <toggle|show|hide|open|close|import|dump>`。`import` 另带 `--es json '<JSON>'`，可选 `--es id <面板 id>`。广播接收器在 API 33+ 以 `RECEIVER_EXPORTED` 注册。
+- **dump**（`DESIGN`，借鉴 dialkit-macos 的双向协议，只取"读出当前值"这一半）：把 Copy 的文本（说明句 + JSON + Kotlin 声明）写进 logcat，不碰剪贴板；不带 `--es id` 时输出所有已注册的面板。每个面板前后各有一行 `----- DialKit dump: <id> -----` / `----- end of DialKit dump: <id> -----`，脚本或编码 agent 可以用 `adb logcat -d -v raw -s DialKit` 读取。
 - **不显示入口**（`entryButton = false`，`DESIGN`，借鉴 dialkit-ios 的 `showsFAB: false`）：宿主用 `DialKit.open()` 或分组的 `setOpen(true)` 打开面板，面板直接从隐藏态展开（形变仍从入口的位置长出）；收起即完全隐藏。切换手势、快捷键和 adb `toggle` 改为直接开关面板，`showEntry()` 不起作用，`entryVisibleByDefault` 被忽略、也不记显隐状态，`defaultOpen` 仍然生效。
 - **代码**：`DialKit.showEntry()` / `hideEntry()` / `toggleEntry()` / `open()` / `close()`。
 - 入口显隐状态写入 SharedPreferences（`io.github.lixiaolin94.dialkit.overlay`），重启后保持。

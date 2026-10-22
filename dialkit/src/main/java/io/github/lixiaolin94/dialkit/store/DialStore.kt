@@ -216,20 +216,45 @@ internal object DialStore {
 
     // ---- Copy
 
-    fun copy(panel: DialPanel): Boolean {
+    private fun exportText(panel: DialPanel): String {
         flush(panel)
-        val text = buildCopyInstruction(
+        return buildCopyInstruction(
             panel.group::class.simpleName ?: "DialGroup",
             panel.name,
             panel.group.persistedValues(),
             panel.group.kotlinHints(),
         )
-        // logcat caps a line near 4 KB; chunk by lines so `adb logcat -s DialKit` gets all of it.
-        text.lines().chunked(40).forEach { Log.i(TAG, it.joinToString("\n")) }
+    }
+
+    /** logcat caps a line near 4 KB; chunk by lines so `adb logcat -s DialKit` gets all of it. */
+    private fun log(text: String) = text.lines().chunked(40).forEach { Log.i(TAG, it.joinToString("\n")) }
+
+    fun copy(panel: DialPanel): Boolean {
+        val text = exportText(panel)
+        log(text)
         val clipboard = appContext?.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager ?: return false
         return runCatching { clipboard.setPrimaryClip(ClipData.newPlainText("DialKit", text)) }
             .onFailure { Log.w(TAG, "Clipboard write failed; the export is in logcat above", it) }
             .isSuccess
+    }
+
+    /**
+     * DESIGN (DialKit has none): `adb shell am broadcast … --es cmd dump [--es id <panel id>]` writes Copy's text for
+     * that panel, or every registered panel, to logcat between marker lines and leaves the clipboard alone, so a
+     * script or coding agent can read the tuned values with `adb logcat -d -v raw -s DialKit`. Returns the count.
+     */
+    fun dump(panelId: String?): Int {
+        val targets = panels.peek.filter { panelId == null || it.id == panelId }
+        if (targets.isEmpty()) {
+            Log.w(TAG, if (panelId == null) "dump: no panel is registered" else "dump: no panel with id \"$panelId\"")
+            return 0
+        }
+        targets.forEach { panel ->
+            Log.i(TAG, "----- DialKit dump: ${panel.id} -----")
+            log(exportText(panel))
+            Log.i(TAG, "----- end of DialKit dump: ${panel.id} -----")
+        }
+        return targets.size
     }
 
     // ---- Import (DESIGN; DialKit has none): the inverse of Copy.

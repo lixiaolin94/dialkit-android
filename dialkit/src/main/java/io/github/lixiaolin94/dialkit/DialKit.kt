@@ -135,6 +135,8 @@ public object DialKit {
                     "close" -> close()
                     // DESIGN: `--es json '<DialKit JSON>' [--es id <panel id>]`, same rules as the Import button.
                     "import" -> DialStore.importText(intent.getStringExtra("id"), intent.getStringExtra("json"), ImportSource.Adb)
+                    // DESIGN: `--es cmd dump [--es id <panel id>]`, Copy's text to logcat (see DialStore.dump).
+                    "dump" -> DialStore.dump(intent.getStringExtra("id"))
                     else -> toggleEntry()
                 }
             }

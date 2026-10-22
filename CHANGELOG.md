@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- `adb shell am broadcast … --es cmd dump [--es id <panel>]` writes Copy's text (JSON and Kotlin) to logcat, so
+  scripts and coding agents can read tuned values without touching the device.
 - `DialKitConfig.entryButton = false` hides the floating entry; the host opens the panel with `DialKit.open()` or
   `setOpen(true)`, and closing it hides it.
 

@@ -164,6 +164,7 @@ dials.observe(this) { d ->
 | Versions | The menu on the left of the toolbar: "Version 1" holds the base values, "New version" saves the current values as a new one |
 | Copy | Copies the values as DialKit JSON plus Kotlin declarations, and logs them under `adb logcat -s DialKit` |
 | Import | Paste DialKit JSON from the clipboard or a file; the values land in a new version. Over adb: add `--es cmd import --es json '<JSON>'` to the broadcast |
+| Read values from a computer | Add `--es cmd dump` to the broadcast, then `adb logcat -d -v raw -s DialKit`: the same text as Copy, for every registered panel (or `--es id <id>` for one) |
 
 With several groups on one screen, the panel shows each as a section. The entry remembers whether it was visible, so it comes back after a restart.
 
@@ -173,6 +174,7 @@ The usual loop:
 
 1. Tune on the device until it looks right.
 2. Tap **Copy**. The clipboard (and `adb logcat -s DialKit`) now holds the values as DialKit JSON, followed by the same dials written as Kotlin with the new defaults, such as `val radius by slider(32f, 0f..64f, step = 1f)`.
+   Without touching the device, `--es cmd dump` on the adb broadcast writes the same text to logcat, which also lets a coding agent pick the values up.
 3. Paste those lines over the old declarations in your `DialGroup`. The tuned values are now the defaults, so release builds (`dialkit-noop`) ship exactly what you saw.
 
 The JSON is the same as DialKit's on the web: paste it into a web prototype, or Import a web export on the device.
@@ -208,9 +210,9 @@ All optional. Call it in `Application.onCreate` or the launcher Activity's `onCr
 ```kotlin
 DialKit.configure {
     entryVisibleByDefault = true                            // show the entry on first launch, no gesture needed
+    entryButton = false                                     // no entry button: open with DialKit.open() / setOpen(true)
     toggleGesture = ToggleGesture.ThreeFingerLongPress()    // or ToggleGesture.None
     keyShortcut = null                                      // turn off Ctrl+Shift+D
-    entryButton = false                                     // no entry button: open with DialKit.open() / setOpen(true)
     entryPosition = DialPosition.BottomEnd                  // where the entry first appears (default TopEnd)
     defaultOpen = true                                      // open the panel at launch when the entry is visible
     theme = DialTheme.Dark                                  // default: follow the system
@@ -233,10 +235,10 @@ To install manually, remove `io.github.lixiaolin94.dialkit.DialKitInitProvider` 
 | `Could not find com.github.lixiaolin94…` | Add `maven("https://jitpack.io")` to `dependencyResolutionManagement.repositories`. |
 | Values reset after restarting the app | That is the default; pass `persist = DialPersist()`. |
 | A release build shows no panel | Expected: release uses `dialkit-noop`, and dials return their defaults. |
+| `IllegalArgumentException` when a group is created | A declaration cannot work: a slider needs finite values, `min < max` and a positive step; an easing needs a duration ≥ 0 and x1, x2 in 0..1; a spring needs a positive duration, or stiffness and mass > 0 and damping ≥ 0. |
 
 ## Modules, samples and docs
 
-| `IllegalArgumentException` when a group is created | A declaration cannot work: a slider needs finite values, `min < max` and a positive step; an easing needs a duration ≥ 0 and x1, x2 in 0..1; a spring needs a positive duration, or stiffness and mass > 0 and damping ≥ 0. |
 | Artifact | Contents | Runtime dependencies |
 |---|---|---|
 | `dialkit` | DSL, overlay, gestures, all UI, persistence | kotlin-stdlib |

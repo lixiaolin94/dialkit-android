@@ -49,6 +49,7 @@
 - 面板调高抓手、键盘（IME）避让、滚动区边缘渐隐、Transition 切换模式时的滚动锚定。
 - 触感反馈（Android 14+）。
 - 外部写入值的校验（非有限数、非法曲线被忽略；按当前声明夹紧取整），以及声明时的参数检查。
+- adb `cmd dump`：把 Copy 文本输出到 logcat（借鉴 dialkit-macos 的双向协议，只取读值这一半）。
 - `entryButton = false`：不显示入口，由宿主 UI 打开面板（借鉴 dialkit-ios 的 `showsFAB: false`）。
 - Import（剪贴板 / 文件 / adb），以及 Copy 附带的 Kotlin 声明。
 - 进程内总是保留值（旋转、深色模式切换都不会丢）。

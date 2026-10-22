@@ -71,10 +71,10 @@ dependencyResolutionManagement {
 
 ```kotlin
 dependencies {
-    debugImplementation("com.github.lixiaolin94.dialkit-android:dialkit:0.0.1")
-    releaseImplementation("com.github.lixiaolin94.dialkit-android:dialkit-noop:0.0.1")
+    debugImplementation("com.github.lixiaolin94.dialkit-android:dialkit:0.0.2")
+    releaseImplementation("com.github.lixiaolin94.dialkit-android:dialkit-noop:0.0.2")
     // 仅 Compose 宿主需要：
-    implementation("com.github.lixiaolin94.dialkit-android:dialkit-compose:0.0.1")
+    implementation("com.github.lixiaolin94.dialkit-android:dialkit-compose:0.0.2")
 }
 ```
 

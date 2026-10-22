@@ -71,10 +71,10 @@ Then the dependencies in your app module:
 
 ```kotlin
 dependencies {
-    debugImplementation("com.github.lixiaolin94.dialkit-android:dialkit:0.0.1")
-    releaseImplementation("com.github.lixiaolin94.dialkit-android:dialkit-noop:0.0.1")
+    debugImplementation("com.github.lixiaolin94.dialkit-android:dialkit:0.0.2")
+    releaseImplementation("com.github.lixiaolin94.dialkit-android:dialkit-noop:0.0.2")
     // Compose hosts only:
-    implementation("com.github.lixiaolin94.dialkit-android:dialkit-compose:0.0.1")
+    implementation("com.github.lixiaolin94.dialkit-android:dialkit-compose:0.0.2")
 }
 ```
 

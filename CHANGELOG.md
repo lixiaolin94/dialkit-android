@@ -5,6 +5,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.0.2] - 2026-10-22
+
 ### Added
 - `DialKitConfig.floatingPanel = false` turns the floating panel off entirely, for apps that tune only in their
   own screens with in-page panels.
@@ -50,5 +52,6 @@ First public release. Aligned with DialKit 2.0.2.
 - DialKit controller and root options: `setValues`, `getOpen` / `setOpen`, `DialPersist(key, presets)`,
   `entryPosition`, `defaultOpen`, `onOpenChange`.
 
-[Unreleased]: https://github.com/lixiaolin94/dialkit-android/compare/0.0.1...HEAD
+[Unreleased]: https://github.com/lixiaolin94/dialkit-android/compare/0.0.2...HEAD
+[0.0.2]: https://github.com/lixiaolin94/dialkit-android/compare/0.0.1...0.0.2
 [0.0.1]: https://github.com/lixiaolin94/dialkit-android/releases/tag/0.0.1

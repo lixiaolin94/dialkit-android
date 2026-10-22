@@ -6,6 +6,9 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Fixed
+- Values from persistence, versions, Import, adb or `setValues` can no longer crash the host: non-finite numbers and
+  invalid curves (negative durations, non-positive stiffness or mass, negative damping, bezier x outside 0..1) are
+  ignored or clamped, and Import reports them as ignored.
 - Slider hash marks follow DialKit's count rule (no mark on an uneven last step).
 - Moving the finger after a long press opened a slider's value input no longer drags the value underneath.
 - The spring curve and panel springs use a numerically stable form near critical damping and when heavily

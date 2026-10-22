@@ -14,6 +14,7 @@ import io.github.lixiaolin94.dialkit.model.inferRange
 import io.github.lixiaolin94.dialkit.model.inferStep
 import io.github.lixiaolin94.dialkit.model.parseColor
 import io.github.lixiaolin94.dialkit.model.resolvePadAxis
+import io.github.lixiaolin94.dialkit.model.sanitizeTransition
 
 /**
  * A set of live controls, declared with property delegates. The property name is the control key
@@ -59,7 +60,9 @@ public abstract class DialGroup {
     ): PropertyDelegateProvider<DialGroup, ReadWriteProperty<DialGroup, Float>> = declare { key ->
         val min = range.start
         val max = range.endInclusive
-        SliderNode(key, label ?: formatLabel(key), default, min, max, step ?: inferStep(min, max))
+        val s = step ?: inferStep(min, max)
+        checkSlider(default, min, max, s)
+        SliderNode(key, label ?: formatLabel(key), default, min, max, s)
     }.map(get = { it.value }, set = { node, v -> node.value = v })
 
     /** Slider whose range is inferred from the default. DialKit: a bare number. */
@@ -67,6 +70,7 @@ public abstract class DialGroup {
         default: Float,
         label: String? = null,
     ): PropertyDelegateProvider<DialGroup, ReadWriteProperty<DialGroup, Float>> = declare { key ->
+        require(default.isFinite()) { "slider($default) needs a finite default" }
         val inferred = inferRange(default)
         SliderNode(key, label ?: formatLabel(key), default, inferred.min, inferred.max, inferred.step)
     }.map(get = { it.value }, set = { node, v -> node.value = v })
@@ -78,6 +82,7 @@ public abstract class DialGroup {
         step: Int = 1,
         label: String? = null,
     ): PropertyDelegateProvider<DialGroup, ReadWriteProperty<DialGroup, Int>> = declare { key ->
+        checkSlider(default.toFloat(), range.first.toFloat(), range.last.toFloat(), step.toFloat())
         SliderNode(
             key, label ?: formatLabel(key), default.toFloat(),
             range.first.toFloat(), range.last.toFloat(), step.toFloat(), isInt = true,
@@ -193,6 +198,10 @@ public abstract class DialGroup {
 
     private fun transition(default: DialValue, label: String?) =
         PropertyDelegateProvider<DialGroup, ReadOnlyProperty<DialGroup, DialTransition>> { _, property ->
+            require(sanitizeTransition(default) == default) {
+                "${property.name}: invalid curve $default. Values must be finite; easing needs duration >= 0 and " +
+                    "x1, x2 in 0..1; springs need visualDuration > 0, or stiffness > 0, damping >= 0 and mass > 0."
+            }
             val node = TransitionNode(property.name, label ?: formatLabel(property.name), default)
             declared += node
             ReadOnlyProperty { _, _ -> DialTransition(node.state.value) }
@@ -248,6 +257,13 @@ public abstract class DialGroup {
             val action = DialAction(node)
             ReadOnlyProperty { _, _ -> action }
         }
+
+    /** DESIGN: fail at declaration rather than with a NaN or an empty range at the first drag. */
+    private fun checkSlider(default: Float, min: Float, max: Float, step: Float) {
+        require(listOf(default, min, max, step).all { it.isFinite() } && max > min && step > 0f) {
+            "slider($default, $min..$max, step = $step) needs finite values, min < max and a positive step"
+        }
+    }
 
     private fun <N : DialNode> declare(create: (key: String) -> N): NodeProvider<N> = NodeProvider { key ->
         create(key).also { declared += it }

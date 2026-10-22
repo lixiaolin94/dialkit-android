@@ -57,6 +57,35 @@ internal fun springProgress(t: Double, p: SpringParams): Double {
     return 1 - (fast * exp(-slow * t) - slow * exp(-fast * t)) / (fast - slow)
 }
 
+/**
+ * DESIGN (not in DialKit): a curve value made safe for the platform, or null to reject it. Values reach a node from
+ * persistence, Import, adb and `setValues`, and the animation APIs throw on what DialKit would pass through:
+ * PathInterpolator on a bezier whose x leaves [0, 1], ValueAnimator / tween on a negative duration, Compose `spring`
+ * on a non-positive stiffness or negative damping. So: every field must be finite; easing needs a duration ≥ 0 and
+ * four control values, with x1 / x2 clamped into [0, 1]; a physics spring needs stiffness > 0, mass > 0 and
+ * damping ≥ 0; a time spring needs visualDuration > 0.
+ */
+internal fun sanitizeTransition(value: DialValue): DialValue? = when (value) {
+    is DialValue.Easing -> {
+        val e = value.ease
+        if (!value.duration.isFinite() || value.duration < 0f || e.size != 4 || e.any { !it.isFinite() }) {
+            null
+        } else {
+            value.copy(ease = listOf(e[0].coerceIn(0f, 1f), e[1], e[2].coerceIn(0f, 1f), e[3]))
+        }
+    }
+    is DialValue.Spring -> {
+        fun ok(v: Float?, valid: (Float) -> Boolean) = v == null || (v.isFinite() && valid(v))
+        val valid = if (value.isPhysics) {
+            ok(value.stiffness) { it > 0f } && ok(value.damping) { it >= 0f } && ok(value.mass) { it > 0f }
+        } else {
+            ok(value.visualDuration) { it > 0f } && ok(value.bounce) { true }
+        }
+        value.takeIf { valid }
+    }
+    else -> null
+}
+
 internal data class GraphPoint(val x: Float, val y: Float)
 
 internal class EasingGraph(val scale: Float, val start: GraphPoint, val end: GraphPoint, val handles: List<GraphPoint>)

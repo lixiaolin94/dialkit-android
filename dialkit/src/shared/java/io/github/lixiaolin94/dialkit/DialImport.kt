@@ -5,6 +5,7 @@ import org.json.JSONObject
 import io.github.lixiaolin94.dialkit.model.DialValue
 import io.github.lixiaolin94.dialkit.model.dialValueFromJson
 import io.github.lixiaolin94.dialkit.model.parseColor
+import io.github.lixiaolin94.dialkit.model.sanitizeTransition
 
 // DESIGN: DialKit 2.0.2 has no import; this is the inverse of its Copy export, so values tuned in a web demo (or
 // copied from this panel on another device) can be brought back in.
@@ -82,16 +83,19 @@ internal fun DialGroup.resolveImport(json: JSONObject): DialImport {
 
 private fun DialNode.importValue(raw: Any): DialValue? = when (this) {
     is SliderNode -> when (raw) {
-        is Number -> DialValue.Num(raw.toFloat())
-        is JSONArray -> (raw.opt(0) as? Number)?.let { DialValue.Num(it.toFloat()) }
+        is Number -> raw.toFloat()
+        is JSONArray -> (raw.opt(0) as? Number)?.toFloat()
         else -> null
-    }
+    }?.takeIf { it.isFinite() }?.let { DialValue.Num(it) }
     is ToggleNode -> (raw as? Boolean)?.let { DialValue.Bool(it) }
     is SelectNode -> (raw as? String)?.takeIf { v -> options.any { it.value == v } }?.let { DialValue.Str(it) }
     is ImageNode -> (raw as? String)?.let { DialValue.Str(it) }
     is TextNode -> (raw as? String)?.let { DialValue.Str(it) }
     is ColorNode -> (raw as? String)?.takeIf { parseColor(it) != null }?.let { DialValue.Str(it) }
-    is TransitionNode -> dialValueFromJson(raw)?.takeIf { it is DialValue.Spring || it is DialValue.Easing }
+    // Invalid curves count as ignored rather than imported (see sanitizeTransition).
+    is TransitionNode -> dialValueFromJson(raw)
+        ?.takeIf { it is DialValue.Spring || it is DialValue.Easing }
+        ?.let(::sanitizeTransition)
     is PadNode -> when (raw) {
         is JSONArray -> if (raw.length() == 2 && raw.opt(0) is Number && raw.opt(1) is Number) {
             DialValue.Point(raw.getDouble(0).toFloat(), raw.getDouble(1).toFloat())

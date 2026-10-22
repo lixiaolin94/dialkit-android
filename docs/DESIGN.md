@@ -226,7 +226,7 @@ class CardDials : DialGroup() {
 
 - 每个值是一个 `DialCell`：可观察的值，带全局读写钩子。`dialkit-compose` 接管这两个钩子，把每个 cell 映射成一个 Compose 状态，所以 Compose 宿主读到哪个值，就只在那个值变化时重组。
 - View 宿主用 `observe(lifecycle/activity) { }`：立即回调一次，之后同一轮主线程内的多次变化合并成一次回调；Activity 或 Lifecycle 销毁时自动解绑。
-- 相同 id 的多次挂载共享同一组值（`SOURCE` refcount 语义），id 默认等于 name。
+- 相同 id 的多次挂载共享同一组值（`SOURCE` refcount 语义），id 默认等于 name。Activity 重建时新实例先挂载、旧实例后卸载，计数从 2 回到 1，面板不会被旧实例的清理注销（dialkit-macos 专门修过这个问题）。
 - 值在卸载后**总是**按 id 保留在进程内（`DESIGN`，**偏离 DialKit**）：DialKit 只有显式传 id 才保留，但在 Android 上，旋转、深色模式切换都会销毁界面，照搬会导致调好的值一转屏就丢。
 - 面板同时列出所有已注册的 panel；只有一个时直接显示它的名字。
 - **代码操作**（对应 DialKit controller）：`setValue(path, value)`；`setValues(...)` 接受完整路径或按文件夹嵌套的 Map，值可以是 `DialValue` 或普通 Kotlin 值（数字、布尔、字符串、`DialPoint`、`DialTransition`），跳过未知路径、action 和类型不符的值（`SOURCE` updateValues / flattenDialValueUpdates），观察者只收到一次变化；`getOpen()` / `setOpen()`：只有一个面板时就是整个面板的展开 / 收起，有多个时是该分组的展开状态，`setOpen(true)` 同时展开面板（`SOURCE` DialRoot subscribePanelOpen）。未注册时 `getOpen()` 为 null。
@@ -249,6 +249,10 @@ class CardDials : DialGroup() {
 - **Transition**：值存为 `{type:'spring'|'easing', …}`，模式另存在 `<path>.__mode`。三种模式各缓存一份值，切换模式时恢复该模式上次的值，不做换算。
 
 | 模式 | 默认值 |
+- **外部写入的值**（持久化、版本、Import、adb、`setValue(s)`）统一经过 `applyValue`：
+  - slider、pad 按**当前**声明夹紧并按 step 取整，所以按旧的、更宽范围存下的值会落进新范围；select 不在选项里、颜色解析不了时保持原值（`SOURCE`）。
+  - `DESIGN`（DialKit 没有，网页上这些值不会让页面崩溃，Android 的动画 API 会抛异常）：非有限数被忽略；曲线经 `sanitizeTransition` 校验——所有字段必须是有限数；easing 的 duration ≥ 0、四个控制值齐全，x1 / x2 夹进 [0, 1]（`PathInterpolator` 要求）；physics 弹簧 stiffness > 0、mass > 0、damping ≥ 0；time 弹簧 visualDuration > 0。不合格的曲线被忽略。Import 时这些值记为"已忽略"，不算导入成功。
+  - 声明时同样检查（`DESIGN`）：slider 的默认值、范围、step 必须是有限数，min < max，step > 0；曲线默认值必须通过上面的校验。不满足就在声明处抛 `IllegalArgumentException`，而不是等到第一次拖动时崩溃（与 pad 轴、颜色已有的检查一致）。
 |---|---|
 | Time | visualDuration 0.3，bounce 0.2 |
 | Physics | stiffness 200，damping 25，mass 1 |

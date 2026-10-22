@@ -11,6 +11,7 @@ import io.github.lixiaolin94.dialkit.model.fitGamut
 import io.github.lixiaolin94.dialkit.model.jsNumber
 import io.github.lixiaolin94.dialkit.model.parseColor
 import io.github.lixiaolin94.dialkit.model.roundValue
+import io.github.lixiaolin94.dialkit.model.sanitizeTransition
 import io.github.lixiaolin94.dialkit.model.snapPadAxis
 
 /** One declared control. Each node owns its [DialCell]s, so reads can be tracked and writes are observable. */
@@ -190,19 +191,26 @@ internal fun DialNode.currentValue(): DialValue? = when (this) {
     is FolderNode, is ActionNode -> null
 }
 
+/**
+ * The one entry for values from outside the panel (persistence, versions, Import, adb, `setValue(s)`). Anything a
+ * control cannot hold is ignored and the control keeps its value: SOURCE for select (an unknown option) and color
+ * (unparseable CSS); DESIGN for non-finite numbers and invalid curves (see [sanitizeTransition]). Sliders and pads
+ * clamp and snap to their current declaration, so values saved under an older, wider range land inside the new one.
+ */
 internal fun DialNode.applyValue(value: DialValue) {
     when {
-        this is SliderNode && value is DialValue.Num -> this.value = value.value
+        this is SliderNode && value is DialValue.Num -> if (value.value.isFinite()) this.value = value.value
         this is ToggleNode && value is DialValue.Bool -> state.value = value.value
         this is SelectNode && value is DialValue.Str -> if (options.any { it.value == value.value }) state.value = value.value
         this is ImageNode && value is DialValue.Str -> state.value = value.value
         this is TextNode && value is DialValue.Str -> state.value = value.value
         this is ColorNode && value is DialValue.Str -> if (parseColor(value.value) != null) state.value = value.value
         this is TransitionNode && (value is DialValue.Spring || value is DialValue.Easing) -> {
-            val m = CurveMode.of(value)
-            cache[m] = value
+            val safe = sanitizeTransition(value) ?: return
+            val m = CurveMode.of(safe)
+            cache[m] = safe
             mode.value = m
-            state.value = value
+            state.value = safe
         }
         this is PadNode && value is DialValue.Point -> set(value)
     }

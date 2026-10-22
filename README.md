@@ -235,6 +235,7 @@ To install manually, remove `io.github.lixiaolin94.dialkit.DialKitInitProvider` 
 
 ## Modules, samples and docs
 
+| `IllegalArgumentException` when a group is created | A declaration cannot work: a slider needs finite values, `min < max` and a positive step; an easing needs a duration ≥ 0 and x1, x2 in 0..1; a spring needs a positive duration, or stiffness and mass > 0 and damping ≥ 0. |
 | Artifact | Contents | Runtime dependencies |
 |---|---|---|
 | `dialkit` | DSL, overlay, gestures, all UI, persistence | kotlin-stdlib |

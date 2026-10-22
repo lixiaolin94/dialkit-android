@@ -235,6 +235,7 @@ DialKit.configure {
 
 ## 模块、示例与文档
 
+| 创建分组时抛 `IllegalArgumentException` | 某个声明的参数不成立：滑杆需要有限数、`min < max`、步长大于 0；缓动需要时长 ≥ 0、x1 和 x2 在 0..1 之间；弹簧需要正的时长，或者刚度和质量大于 0、阻尼 ≥ 0。 |
 | 构件 | 内容 | 运行时依赖 |
 |---|---|---|
 | `dialkit` | DSL、浮层、手势、全部 UI、持久化 | kotlin-stdlib |

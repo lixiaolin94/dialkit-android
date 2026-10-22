@@ -15,7 +15,26 @@ internal data class OverlayInsets(
     val right: Int = 0,
     val bottom: Int = 0,
     val ime: Int = 0,
-)
+) {
+    companion object {
+        /** System bars and display cutout (plus the IME, separately on API 30+) from window insets. */
+        fun of(wi: WindowInsets): OverlayInsets = if (Build.VERSION.SDK_INT >= 30) {
+            val bars = wi.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout())
+            OverlayInsets(bars.left, bars.top, bars.right, bars.bottom, wi.getInsets(WindowInsets.Type.ime()).bottom)
+        } else {
+            val cutout = if (Build.VERSION.SDK_INT >= 28) wi.displayCutout?.let { intArrayOf(it.safeInsetLeft, it.safeInsetTop, it.safeInsetRight) } else null
+            @Suppress("DEPRECATION")
+            OverlayInsets(
+                maxOf(wi.systemWindowInsetLeft, cutout?.get(0) ?: 0),
+                maxOf(wi.systemWindowInsetTop, cutout?.get(1) ?: 0),
+                maxOf(wi.systemWindowInsetRight, cutout?.get(2) ?: 0),
+                // Pre-30 the IME arrives folded into the bottom system-window inset.
+                wi.systemWindowInsetBottom,
+                0,
+            )
+        }
+    }
+}
 
 /**
  * Full-window layer appended to the Activity's DecorView. It only takes touches the overlay needs: none while
@@ -49,21 +68,7 @@ internal class DialKitLayer(context: Context) : FrameLayout(context) {
 
     private fun refreshInsets(given: WindowInsets? = null) {
         val wi = given ?: rootWindowInsets ?: return
-        val next = if (Build.VERSION.SDK_INT >= 30) {
-            val bars = wi.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout())
-            OverlayInsets(bars.left, bars.top, bars.right, bars.bottom, wi.getInsets(WindowInsets.Type.ime()).bottom)
-        } else {
-            val cutout = if (Build.VERSION.SDK_INT >= 28) wi.displayCutout?.let { intArrayOf(it.safeInsetLeft, it.safeInsetTop, it.safeInsetRight) } else null
-            @Suppress("DEPRECATION")
-            OverlayInsets(
-                maxOf(wi.systemWindowInsetLeft, cutout?.get(0) ?: 0),
-                maxOf(wi.systemWindowInsetTop, cutout?.get(1) ?: 0),
-                maxOf(wi.systemWindowInsetRight, cutout?.get(2) ?: 0),
-                // Pre-30 the IME arrives folded into the bottom system-window inset.
-                wi.systemWindowInsetBottom,
-                0,
-            )
-        }
+        val next = OverlayInsets.of(wi)
         if (next != insets) {
             insets = next
             // The overlay keeps its size when the IME shows, so ask the children too — requestLayout() here

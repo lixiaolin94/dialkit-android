@@ -275,6 +275,7 @@ To install manually, remove `io.github.lixiaolin94.dialkit.DialKitInitProvider` 
 | Sample | What it shows |
 |---|---|
 | [`samples/catalog`](samples/catalog) | Every control and panel feature, one screen each, including panels in a Compose and a Views page |
+| [`samples/embedded`](samples/embedded) | An app with no floating panel (`floatingPanel = false`): the dials are tuned on its own Compose and Views screens |
 | [`samples/compose`](samples/compose) | A Compose host with a single playground panel |
 | [`samples/views`](samples/views) | A plain `android.app.Activity` with View-based observation |
 

@@ -275,6 +275,7 @@ DialKit.configure {
 | 示例 | 内容 |
 |---|---|
 | [`samples/catalog`](samples/catalog) | 全部控件与面板功能，一屏一项，包括 Compose 页面和 View 页面里的页面内面板 |
+| [`samples/embedded`](samples/embedded) | 完全没有悬浮面板的 App（`floatingPanel = false`）：在它自己的 Compose 页面和 View 页面里调参 |
 | [`samples/compose`](samples/compose) | Compose 宿主，单个综合面板 |
 | [`samples/views`](samples/views) | 普通 `android.app.Activity`，用 View 方式监听 |
 

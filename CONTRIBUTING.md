@@ -8,6 +8,7 @@ Requirements: JDK 17 and the Android SDK (compileSdk 35).
 ./gradlew :dialkit:testDebugUnitTest     # JVM unit tests (maths, DSL, import)
 ./gradlew :dialkit:lintRelease :dialkit-noop:lintRelease :dialkit-compose:lintRelease   # lint, library modules
 ./gradlew :samples:catalog:installDebug  # Catalog: every control and panel feature, one screen each
+./gradlew :samples:embedded:installDebug # No floating panel: tuning on the app's own screens
 ./gradlew :samples:compose:installDebug  # Compose sample
 ./gradlew :samples:views:installDebug    # View sample (plain android.app.Activity)
 ```

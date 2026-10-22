@@ -218,7 +218,7 @@ DialKit.configure {
 | 返回键 | 弹层打开时先关弹层：API 33+ 注册 `OnBackInvokedCallback`（PRIORITY_OVERLAY），其余靠持有焦点、在 `dispatchKeyEvent` 里处理 Back / Escape | `DESIGN` |
 | 与悬浮层的关系 | 视图在屏幕上时，这个分组不出现在悬浮面板里（`DialStore.floating`）；`getOpen()` 恒为 true，`setOpen()` 不起作用 | `DESIGN (user)` |
 | 构建类型 | 完整的 `dialkit` 在任何构建类型下都可用（需要时自行初始化存储）；`dialkit-noop` 的同名视图不绘制任何东西 | `DESIGN` |
-| 只要页面内面板 | `floatingPanel = false`：Activity resume 时不注入浮层、不包装 Window.Callback（所以没有入口、三指手势和快捷键）；`showEntry` / `open` / adb `toggle` 等显示请求被忽略，logcat 提示一次。adb `dump` / `import` 照常 | `DESIGN` |
+| 只要页面内面板 | `floatingPanel = false`：Activity resume 时不注入浮层、不包装 Window.Callback（所以没有入口、三指手势和快捷键）；`showEntry` / `open` / adb `toggle` 等显示请求被忽略，logcat 提示一次。adb `dump` / `import` 照常（adb 广播接收器随 `install` 注册，所以只在 debuggable 包里有）| `DESIGN` |
 
 - 视图在 attach 时按 `group` 找到已注册的面板，并监听注册变化；`group` 没注册时显示一行提示，而不是空白。
 - Compose 的 `DialKitPanel` 是对 `DialPanelView` 的 `AndroidView` 包装。在 `LazyColumn` 里滚出可见范围足够远会被销毁，分组会暂时回到悬浮面板。

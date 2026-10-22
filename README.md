@@ -228,7 +228,7 @@ Column(Modifier.verticalScroll(rememberScrollState())) {
 - Pick the dependency by what the screen is for:
   - **A debug tool** that must not ship: keep `debugImplementation(dialkit)` / `releaseImplementation(dialkit-noop)`. In release the view draws nothing and every dial returns its default.
   - **A feature of the app**, such as a tuning screen in an internal or demo build: depend on `implementation("…:dialkit")` for every build type. The in-page panel works in any build type; the floating overlay still installs only in debuggable builds, and `floatingPanel = false` turns it off there too.
-- For an app that tunes only in its own screens, turn the floating panel off entirely with `DialKit.configure { floatingPanel = false }` (see [`samples/embedded`](samples/embedded)): nothing is added to your Activities, and the gesture, shortcut and adb `toggle` do nothing; adb `dump` and `import` still work.
+- For an app that tunes only in its own screens, turn the floating panel off entirely with `DialKit.configure { floatingPanel = false }` (see [`samples/embedded`](samples/embedded)): nothing is added to your Activities, and the gesture, shortcut and adb `toggle` do nothing; adb `dump` and `import` still work in debuggable builds (the adb commands exist only there).
 - In a `LazyColumn`, an item scrolled far enough away is disposed, and the group returns to the floating panel until it comes back; use a plain scrolling `Column` to keep it.
 
 ## Configure

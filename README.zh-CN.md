@@ -228,7 +228,7 @@ Column(Modifier.verticalScroll(rememberScrollState())) {
 - 依赖怎么选，看这个页面是干什么的：
   - **只是开发调试工具**，不能带进正式包：保持 `debugImplementation(dialkit)` / `releaseImplementation(dialkit-noop)`。release 包里这个视图什么都不显示，参数都返回默认值。
   - **App 的正式功能**，比如内部版或演示版里的调参页：所有构建类型都用 `implementation("…:dialkit")`。页面内面板在任何构建类型下都能用；悬浮层仍然只在 debuggable 包里自动安装，加上 `floatingPanel = false` 后连那里也不会出现。
-- 如果应用只在自己的页面里调参，可以用 `DialKit.configure { floatingPanel = false }` 彻底关掉悬浮面板（见 [`samples/embedded`](samples/embedded)）：不会往 Activity 里注入任何东西，手势、快捷键和 adb `toggle` 都不起作用；adb `dump` 和 `import` 照常可用。
+- 如果应用只在自己的页面里调参，可以用 `DialKit.configure { floatingPanel = false }` 彻底关掉悬浮面板（见 [`samples/embedded`](samples/embedded)）：不会往 Activity 里注入任何东西，手势、快捷键和 adb `toggle` 都不起作用；adb `dump` 和 `import` 在 debuggable 包里照常可用（adb 命令只在 debuggable 包里存在）。
 - 放在 `LazyColumn` 里时，滚得足够远的项会被销毁，分组会暂时回到悬浮面板里，滚回来后再离开；想避免这种情况就用普通的可滚动 `Column`。
 
 ## 配置

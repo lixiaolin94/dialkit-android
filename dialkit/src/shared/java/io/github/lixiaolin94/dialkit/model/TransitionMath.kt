@@ -31,20 +31,30 @@ internal fun springParams(spring: DialValue.Spring): SpringParams {
     return SpringParams(stiffness, damping, 1.0)
 }
 
-/** SOURCE transition-math.ts:springProgress — closed-form damped oscillator, 0 → 1 from rest. */
+/**
+ * SOURCE transition-math.ts:springProgress — closed-form damped oscillator, 0 → 1 from rest.
+ * DESIGN: the same three branches written in a numerically stable form (after dialkit-macos SpringResponse.swift):
+ * a relative tolerance for critical damping instead of DialKit's fixed ζ ∈ [0.9999, 1.0001] band, sin(φ)/φ so the
+ * underdamped branch stays finite as ωd → 0, and the slow overdamped root taken as ω²/fast rather than a
+ * difference of two nearly equal numbers. Invalid parameters (non-finite, k ≤ 0, m ≤ 0, c < 0) give 0.
+ */
 internal fun springProgress(t: Double, p: SpringParams): Double {
-    if (t <= 0) return 0.0
-    val w0 = sqrt(p.stiffness / p.mass)
-    val zeta = p.damping / (2 * sqrt(p.stiffness * p.mass))
-    if (zeta < 0.9999) {
-        val wd = w0 * sqrt(1 - zeta * zeta)
-        return 1 - exp(-zeta * w0 * t) * (cos(wd * t) + (zeta * w0) / wd * sin(wd * t))
+    val (k, c, m) = p
+    if (!(t > 0) || !k.isFinite() || !c.isFinite() || !m.isFinite() || k <= 0 || m <= 0 || c < 0) return 0.0
+    if (t.isInfinite()) return 1.0
+    val w0 = sqrt(k / m)
+    val decay = c / (2 * m) // ζ·ω0
+    if (abs(decay - w0) <= w0 * 1e-8) return 1 - exp(-w0 * t) * (1 + w0 * t)
+    if (decay < w0) {
+        val wd = sqrt((w0 - decay) * (w0 + decay))
+        val phase = wd * t
+        val sinc = if (abs(phase) < 1e-8) 1.0 else sin(phase) / phase
+        return 1 - exp(-decay * t) * (cos(phase) + decay * t * sinc)
     }
-    if (zeta < 1.0001) return 1 - exp(-w0 * t) * (1 + w0 * t)
-    val wd = w0 * sqrt(zeta * zeta - 1)
-    val r1 = -zeta * w0 + wd
-    val r2 = -zeta * w0 - wd
-    return 1 + (r2 * exp(r1 * t) - r1 * exp(r2 * t)) / (r1 - r2)
+    val root = sqrt((decay - w0) * (decay + w0))
+    val fast = decay + root
+    val slow = w0 * w0 / fast
+    return 1 - (fast * exp(-slow * t) - slow * exp(-fast * t)) / (fast - slow)
 }
 
 internal data class GraphPoint(val x: Float, val y: Float)

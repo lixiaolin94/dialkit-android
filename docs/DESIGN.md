@@ -262,6 +262,8 @@ class CardDials : DialGroup() {
 | Physics `{k, c, m}` | `stiffness` = k/m，`dampingRatio` = c/(2√(k·m)) | 同左 | `MAP`，等价变换（单位质量） |
 | Easing `{d, [x1,y1,x2,y2]}` | `toInterpolator()`（PathInterpolator）+ `durationMillis` | `tween(d·1000, CubicBezierEasing)` | `MAP` |
 
+**曲线预览与动画的数值形式**（`DESIGN`）：`springProgress` 和面板动画用的 `springStep` 采用 DialKit 闭式解的数值稳定写法（参照 dialkit-macos SpringResponse.swift）：临界阻尼用相对容差 `|ζω − ω| ≤ 1e-8·ω` 判断，取代 DialKit 固定的 ζ ∈ [0.9999, 1.0001]；欠阻尼分支用 sin(φ)/φ，ωd → 0 时不发散；过阻尼的慢根取 ω²/fast，避免两个相近的数相减。参数非法时返回 0。这一段区间以外与 DialKit 的公式相差小于 1e-12（单元测试固定）。
+
 `stiffness` / `dampingRatio` 可以直接传给 `SpringForce`。
 
 ### 6.5 版本与持久化（`SOURCE` 形状）

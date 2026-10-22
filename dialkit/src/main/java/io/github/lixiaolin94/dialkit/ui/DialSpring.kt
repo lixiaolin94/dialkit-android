@@ -108,23 +108,30 @@ internal class SpringValue(
 internal fun springStep(x0: Double, v0: Double, t: Double, spec: SpringSpec): Pair<Double, Double> {
     val w0 = sqrt(spec.stiffness.toDouble())
     val z = spec.dampingRatio.toDouble()
+    if (!(t > 0) || !(w0 > 0) || !w0.isFinite() || !(z >= 0)) return x0 to v0
+    val decay = z * w0
+    // DESIGN: same branches as springProgress, in its numerically stable form (relative critical tolerance,
+    // sin(φ)/φ near ωd → 0, slow overdamped root as ω²/fast).
     return when {
-        z < 1.0 -> {
-            val wd = w0 * sqrt(1 - z * z)
-            val e = exp(-z * w0 * t)
-            val c = cos(wd * t)
-            val s = sin(wd * t)
-            e * (x0 * c + (v0 + z * w0 * x0) / wd * s) to e * (v0 * c - (z * w0 * v0 + w0 * w0 * x0) / wd * s)
-        }
-        z == 1.0 -> {
+        abs(decay - w0) <= w0 * 1e-8 -> {
             val e = exp(-w0 * t)
             val b = v0 + w0 * x0
             e * (x0 + b * t) to e * (v0 - w0 * b * t)
         }
+        decay < w0 -> {
+            val wd = sqrt((w0 - decay) * (w0 + decay))
+            val phase = wd * t
+            val sinc = if (abs(phase) < 1e-8) 1.0 else sin(phase) / phase // sin(ωd·t) / ωd = t·sinc
+            val e = exp(-decay * t)
+            val c = cos(phase)
+            e * (x0 * c + (v0 + decay * x0) * t * sinc) to e * (v0 * c - (decay * v0 + w0 * w0 * x0) * t * sinc)
+        }
         else -> {
-            val root = w0 * sqrt(z * z - 1)
-            val r1 = -z * w0 + root
-            val r2 = -z * w0 - root
+            val root = sqrt((decay - w0) * (decay + w0))
+            val fast = decay + root
+            val slow = w0 * w0 / fast
+            val r1 = -slow
+            val r2 = -fast
             val c1 = (v0 - r2 * x0) / (r1 - r2)
             val c2 = x0 - c1
             c1 * exp(r1 * t) + c2 * exp(r2 * t) to c1 * r1 * exp(r1 * t) + c2 * r2 * exp(r2 * t)

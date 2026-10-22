@@ -5,6 +5,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+- The spring curve and panel springs use a numerically stable form near critical damping and when heavily
+  overdamped.
+
 ## [0.0.1] - 2026-10-21
 
 First public release. Aligned with DialKit 2.0.2.

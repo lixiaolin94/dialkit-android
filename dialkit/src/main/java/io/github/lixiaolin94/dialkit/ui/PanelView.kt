@@ -140,7 +140,7 @@ internal class PanelView(private val ui: DialUi) : LinearLayout(ui.context) {
     var onContentChanged: (() -> Unit)? = null
 }
 
-private fun DialUi.withActions(panel: DialPanel) = DialUi(context, palette, popups) { action: ActionNode ->
+internal fun DialUi.withActions(panel: DialPanel) = DialUi(context, palette, popups) { action: ActionNode ->
     action.onClick?.invoke()
     DialStore.dispatchAction(panel, action.path)
 }
@@ -365,6 +365,6 @@ internal class PanelScrollView(context: Context) : ScrollView(context) {
     }
 }
 
-private const val HEADER_TOP = 10 // dp above the title row. SOURCE 10 (user tried 6, then +4)
-private const val TITLE_BOTTOM = 12 // dp between the title row and the toolbar. SOURCE 8, DESIGN (user) +4
-private const val FADE_EDGE = 16 // dp. DESIGN
+internal const val HEADER_TOP = 10 // dp above the title row. SOURCE 10 (user tried 6, then +4)
+internal const val TITLE_BOTTOM = 12 // dp between the title row and the toolbar. SOURCE 8, DESIGN (user) +4
+internal const val FADE_EDGE = 16 // dp. DESIGN

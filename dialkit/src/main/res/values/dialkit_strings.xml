@@ -4,6 +4,7 @@
     <string name="dialkit_name" translatable="false">DialKit</string>
     <string name="dialkit_close">Close</string>
     <string name="dialkit_empty">No dials registered on this screen.</string>
+    <string name="dialkit_embedded_unregistered">This group is not registered. Create it with DialKit.panel or rememberDialKit, then show it here.</string>
 
     <!-- Versions. "Version N" is also the persisted preset name (DialKit's format), so it is not translated. -->
     <string name="dialkit_version_base" translatable="false">Version 1</string>

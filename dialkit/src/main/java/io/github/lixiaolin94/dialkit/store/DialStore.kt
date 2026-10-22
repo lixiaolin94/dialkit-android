@@ -140,6 +140,11 @@ internal object DialStore {
         prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
     }
 
+    /** For panels shown in a page when the overlay was never installed (a non-debuggable build with `dialkit`). */
+    fun ensureInit(context: Context) {
+        if (appContext == null) init(context)
+    }
+
     fun <G : DialGroup> acquire(
         id: String,
         name: String,

@@ -112,8 +112,13 @@ internal class EmbeddedPopupHost private constructor(context: Context, palette: 
         fun release(host: EmbeddedPopupHost) {
             if (--host.users > 0) return
             host.popups.dismiss()
-            (host.parent as? ViewGroup)?.let { decor ->
-                decor.setTag(R.id.dialkit_popup_host, null)
+            val decor = host.parent as? ViewGroup ?: return
+            // Callers release from onDetachedFromWindow, which runs while the DecorView is still walking its
+            // children to detach them (an Activity being destroyed); removing a child of the DecorView there
+            // shrinks that walk and crashes it. Remove on the next loop instead, unless a new user arrived.
+            decor.post {
+                if (host.users > 0 || host.parent !== decor) return@post
+                if (decor.getTag(R.id.dialkit_popup_host) === host) decor.setTag(R.id.dialkit_popup_host, null)
                 decor.removeView(host)
             }
         }

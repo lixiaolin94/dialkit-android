@@ -192,6 +192,7 @@ DialKit.configure {
 - **钉住高度只是上限**：实际高度取 `min(内容高度, 钉住高度)`，内容比钉住高度短时不会在下方留空。
 - **双击抓手**：取消钉住，恢复默认高度。
 - **IME**：键盘弹出时最大高度随之收缩，面板底边停在键盘上方 16dp。
+- **聚焦的输入框**（`DESIGN`，参照 dialkit-ios）：Text 控件或 slider 的数值输入框获得焦点时，以及键盘让面板变矮之后，如果它不在滚动区的可见范围内（上下各留 16dp），就平滑滚到滚动区中间。平台的 ScrollView 只会把它滚到边缘。
 
 ### 5.5 标题栏
 
@@ -248,18 +249,20 @@ class CardDials : DialGroup() {
 
 - 给了范围、没给 step 时（inferStep）：range ≤ 1 → 0.01；≤ 10 → 0.1；≤ 100 → 1；否则 10。
 - `roundValue` 按 step 的十进制位数精确舍入（避免 60 × 0.01f = 0.59999996）。
-- **颜色**：支持 #3/4/6/8 位、rgb(a)、hsl(a)、oklch、`color(display-p3 …)`；内部存 CSS 字符串，与 DialKit 一致，对外读出来是 sRGB 的 ARGB Int（广色域值先映射进 sRGB）。
-- **Transition**：值存为 `{type:'spring'|'easing', …}`，模式另存在 `<path>.__mode`。三种模式各缓存一份值，切换模式时恢复该模式上次的值，不做换算。
-
-| 模式 | 默认值 |
 - **外部写入的值**（持久化、版本、Import、adb、`setValue(s)`）统一经过 `applyValue`：
   - slider、pad 按**当前**声明夹紧并按 step 取整，所以按旧的、更宽范围存下的值会落进新范围；select 不在选项里、颜色解析不了时保持原值（`SOURCE`）。
   - `DESIGN`（DialKit 没有，网页上这些值不会让页面崩溃，Android 的动画 API 会抛异常）：非有限数被忽略；曲线经 `sanitizeTransition` 校验——所有字段必须是有限数；easing 的 duration ≥ 0、四个控制值齐全，x1 / x2 夹进 [0, 1]（`PathInterpolator` 要求）；physics 弹簧 stiffness > 0、mass > 0、damping ≥ 0；time 弹簧 visualDuration > 0。不合格的曲线被忽略。Import 时这些值记为"已忽略"，不算导入成功。
   - 声明时同样检查（`DESIGN`）：slider 的默认值、范围、step 必须是有限数，min < max，step > 0；曲线默认值必须通过上面的校验。不满足就在声明处抛 `IllegalArgumentException`，而不是等到第一次拖动时崩溃（与 pad 轴、颜色已有的检查一致）。
+- **颜色**：支持 #3/4/6/8 位、rgb(a)、hsl(a)、oklch、`color(display-p3 …)`；内部存 CSS 字符串，与 DialKit 一致，对外读出来是 sRGB 的 ARGB Int（广色域值先映射进 sRGB）。
+- **Transition**：值存为 `{type:'spring'|'easing', …}`，模式另存在 `<path>.__mode`。三种模式各缓存一份值，切换模式时恢复该模式上次的值，不做换算。
+
+| 模式 | 默认值 |
 |---|---|
 | Time | visualDuration 0.3，bounce 0.2 |
 | Physics | stiffness 200，damping 25，mass 1 |
 | Easing | duration 0.3，ease [1, −0.4, 0.5, 1] |
+
+**曲线预览与动画的数值形式**（`DESIGN`）：`springProgress` 和面板动画用的 `springStep` 采用 DialKit 闭式解的数值稳定写法（参照 dialkit-macos SpringResponse.swift）：临界阻尼用相对容差 `|ζω − ω| ≤ 1e-8·ω` 判断，取代 DialKit 固定的 ζ ∈ [0.9999, 1.0001]；欠阻尼分支用 sin(φ)/φ，ωd → 0 时不发散；过阻尼的慢根取 ω²/fast，避免两个相近的数相减。参数非法时返回 0。这一段区间以外与 DialKit 的公式相差小于 1e-12（单元测试固定）。
 
 ### 6.4 在宿主里使用曲线
 
@@ -268,8 +271,6 @@ class CardDials : DialGroup() {
 | Time `{vd, bounce}` | `stiffness` = (2π/(1.2·vd))²，`dampingRatio` = clamp(1−bounce, .05, 1) | `spring(dampingRatio, stiffness)` | `SOURCE` transition-math.ts:L30，`MAP` 化为 ratio |
 | Physics `{k, c, m}` | `stiffness` = k/m，`dampingRatio` = c/(2√(k·m)) | 同左 | `MAP`，等价变换（单位质量） |
 | Easing `{d, [x1,y1,x2,y2]}` | `toInterpolator()`（PathInterpolator）+ `durationMillis` | `tween(d·1000, CubicBezierEasing)` | `MAP` |
-
-**曲线预览与动画的数值形式**（`DESIGN`）：`springProgress` 和面板动画用的 `springStep` 采用 DialKit 闭式解的数值稳定写法（参照 dialkit-macos SpringResponse.swift）：临界阻尼用相对容差 `|ζω − ω| ≤ 1e-8·ω` 判断，取代 DialKit 固定的 ζ ∈ [0.9999, 1.0001]；欠阻尼分支用 sin(φ)/φ，ωd → 0 时不发散；过阻尼的慢根取 ω²/fast，避免两个相近的数相减。参数非法时返回 0。这一段区间以外与 DialKit 的公式相差小于 1e-12（单元测试固定）。
 
 `stiffness` / `dampingRatio` 可以直接传给 `SpringForce`。
 

@@ -10,6 +10,8 @@ All notable changes to this project are documented here. The format follows
   scripts and coding agents can read tuned values without touching the device.
 - `DialKitConfig.entryButton = false` hides the floating entry; the host opens the panel with `DialKit.open()` or
   `setOpen(true)`, and closing it hides it.
+- Focused text fields in the panel (Text controls, a slider's value editor) scroll into view, also after the keyboard
+  shrinks the panel.
 
 ### Fixed
 - Values from persistence, versions, Import, adb or `setValues` can no longer crash the host: non-finite numbers and

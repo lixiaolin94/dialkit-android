@@ -5,9 +5,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Rect
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -332,8 +334,34 @@ internal class PanelScrollView(context: Context) : ScrollView(context) {
         return super.onTouchEvent(ev)
     }
 
+    // DESIGN (after the dialkit-ios port): a focused text field — a Text control or a slider's value editor — is
+    // brought to the middle of the scroll area when it gains focus and again when the area resizes (the panel
+    // shrinks for the keyboard), unless it is already fully in view. The platform alone only scrolls it to the edge.
+    override fun requestChildFocus(child: View?, focused: View?) {
+        super.requestChildFocus(child, focused)
+        if (focused is EditText) post { reveal(focused) }
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        (findFocus() as? EditText)?.let { field -> post { reveal(field) } }
+    }
+
+    private fun reveal(field: View) {
+        if (!field.isAttachedToWindow || findFocus() !== field) return
+        val content = getChildAt(0) ?: return
+        val r = Rect()
+        field.getDrawingRect(r)
+        offsetDescendantRectToMyCoords(field, r)
+        val margin = (REVEAL_MARGIN * resources.displayMetrics.density).toInt()
+        if (r.top >= scrollY + margin && r.bottom <= scrollY + height - margin) return
+        val target = (r.centerY() - height / 2).coerceIn(0, (content.height - height).coerceAtLeast(0))
+        smoothScrollTo(0, target)
+    }
+
     private companion object {
         const val STOPPED_MS = 40L
+        const val REVEAL_MARGIN = 16 // dp kept clear around a focused field before it counts as in view. DESIGN
     }
 }
 

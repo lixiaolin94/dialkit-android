@@ -7,4 +7,6 @@
     <item name="dialkit_action_right" type="id" />
     <item name="dialkit_action_up" type="id" />
     <item name="dialkit_action_down" type="id" />
+    <!-- The DecorView's popup layer for page-embedded panels. -->
+    <item name="dialkit_popup_host" type="id" />
 </resources>

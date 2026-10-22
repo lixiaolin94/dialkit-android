@@ -32,7 +32,7 @@ import io.github.lixiaolin94.dialkit.ui.Haptics
  * toggle | show | hide | open | close | import, the last with `--es json '<DialKit JSON>'`).
  */
 public object DialKit {
-    private val config = DialKitConfig()
+    internal val config = DialKitConfig()
     private var tracker: ActivityTracker? = null
 
     public val isInstalled: Boolean get() = tracker != null

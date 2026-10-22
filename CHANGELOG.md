@@ -7,6 +7,7 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 - Slider hash marks follow DialKit's count rule (no mark on an uneven last step).
+- Moving the finger after a long press opened a slider's value input no longer drags the value underneath.
 - The spring curve and panel springs use a numerically stable form near critical damping and when heavily
   overdamped.
 

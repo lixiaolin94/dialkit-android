@@ -263,6 +263,8 @@ internal class SliderView(
                 updateHandle()
             }
             MotionEvent.ACTION_MOVE -> {
+                // The long press opened the input: the rest of this gesture must not drag the value under it.
+                if (longPressed) return true
                 val dx = e.x - downX
                 val dy = e.y - downY
                 if (abs(dx) > slop || abs(dy) > slop) removeCallbacks(longPress)

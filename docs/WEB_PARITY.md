@@ -11,7 +11,7 @@
 | 网页版 | Android | 说明 |
 |---|---|---|
 | 配置写法：裸数字、`[v, min, max, step]`、嵌套对象即文件夹、`_collapsed` | `DialGroup` 属性委托：`slider` / `folder(collapsed)` 等 | 写法换成 Kotlin DSL，path 规则、label 生成、范围与步长推断全部一致（`SOURCE`，单元测试覆盖） |
-| 控件：slider、toggle、transition（spring time / physics、easing）、folder、action、select、color、text、pad | 全部 | 网页版的 `spring` 类型在解析时也会转成 transition 控件，两边一致 |
+| 控件：slider、toggle、transition（spring time / physics、easing）、folder、action、select、color、image、text、pad | 全部 | 网页版的 `spring` 类型在解析时也会转成 transition 控件，两边一致 |
 | Slider：绝对定位、点按吸附、橡皮筋、刻度线、拖压标签时淡出 | 一致 | |
 | Transition：三种模式各自缓存、`.__mode`、曲线预览与 easing 编辑器 | 一致 | |
 | Color：hex / oklch / display-p3，色板 + Hue + Opacity | 一致 | |
@@ -35,13 +35,13 @@
 
 | # | 网页版功能 | 建议 | 理由 / 适配方式 |
 |---|---|---|---|
-| 5 | `productionEnabled` | **不移植** | Android 用"只在 debuggable 包里自动安装"加 `dialkit-noop` 解决同一个问题，更安全 |
-| 8 | Pad 拖动时按 Shift 锁定一个轴 | **不移植** | 触屏没有修饰键，另造手势容易和滚动、拖动冲突 |
-| 9 | 键盘快捷键（`shortcuts` 选项与快捷键菜单） | **暂不移植** | 默认依赖物理键盘和鼠标，手机上只有外接键盘才有意义 |
-| 11 | Timeline（`useDialTimeline` / `DialTimeline`） | **暂不考虑** | 功能面大（时间轴编辑与播放），先保证核心面板的完整度 |
-| 12 | 配置对象运行时变化时热更新面板（`updatePanel`） | **不适用** | Kotlin DSL 是静态声明，结构不会在运行时变化 |
-| 13 | 悬停色、鼠标指针样式、焦点环 | **不适用** | 触屏没有对应状态 |
-| 14 | 20px backdrop blur | **不移植** | glass-bg 本身是不透明色，模糊几乎看不出来，平台实现成本高 |
+| 1 | `productionEnabled` | **不移植** | Android 用"只在 debuggable 包里自动安装"加 `dialkit-noop` 解决同一个问题，更安全 |
+| 2 | Pad 拖动时按 Shift 锁定一个轴 | **不移植** | 触屏没有修饰键，另造手势容易和滚动、拖动冲突 |
+| 3 | 键盘快捷键（`shortcuts` 选项与快捷键菜单） | **暂不移植** | 默认依赖物理键盘和鼠标，手机上只有外接键盘才有意义 |
+| 4 | Timeline（`useDialTimeline` / `DialTimeline`） | **暂不考虑** | 功能面大（时间轴编辑与播放），先保证核心面板的完整度 |
+| 5 | 配置对象运行时变化时热更新面板（`updatePanel`） | **不适用** | Kotlin DSL 是静态声明，结构不会在运行时变化 |
+| 6 | 悬停色、鼠标指针样式、焦点环 | **不适用** | 触屏没有对应状态 |
+| 7 | 20px backdrop blur | **不移植** | glass-bg 本身是不透明色，模糊几乎看不出来，平台实现成本高 |
 
 ### 1.3 Android 独有（网页版没有，不随网页版改动）
 
@@ -51,6 +51,7 @@
 - 外部写入值的校验（非有限数、非法曲线被忽略；按当前声明夹紧取整），以及声明时的参数检查。
 - adb `cmd dump`：把 Copy 文本输出到 logcat（借鉴 dialkit-macos 的双向协议，只取读值这一半）。
 - `entryButton = false`：不显示入口，由宿主 UI 打开面板（借鉴 dialkit-ios 的 `showsFAB: false`）。
+- `floatingPanel = false`：完全不要悬浮面板，只用页面内面板。
 - Import（剪贴板 / 文件 / adb），以及 Copy 附带的 Kotlin 声明。
 - 进程内总是保留值（旋转、深色模式切换都不会丢）。
 - `dialkit-noop`、`dialkit-compose` 的模块拆分，核心库零运行时依赖。

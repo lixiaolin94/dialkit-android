@@ -203,6 +203,26 @@ DialKit.configure {
 
 ---
 
+### 5.6 页面内面板（`DialPanelView` / `DialKitPanel`）
+
+把一个已注册的分组当作页面的一部分显示，而不是放在悬浮面板里。对应网页版的 `mode: 'inline'`，不过按分组提供，也不在浮层和页面之间切换。
+
+| 项 | 值 | 来源 |
+|---|---|---|
+| 外观 | 面板底色 glass-bg，左右内边距 12dp；没有描边、圆角和阴影；宽度占满 | `SOURCE` styles.css `.dialkit-panel-inline` / `.dialkit-panel-inner` |
+| 标题行 | 分组名 15sp/600，不可折叠；不显示关闭按钮和拖拽点阵；行距沿用悬浮面板（HEADER_TOP 10、TITLE_BOTTOM 12） | `SOURCE` Folder.tsx 的 inline 根标题；行距 `DESIGN (user)` |
+| 工具栏 | 与悬浮面板相同（版本、Import、Copy），下方 6dp + 1dp 分隔线 + 12dp | `SOURCE` |
+| 高度 | wrap 时随内容变高，由宿主滚动（网页版同样用宿主的滚动容器）；有上限时标题和工具栏固定，控件区在内部滚动（带渐隐边） | `DESIGN` |
+| 弹层 | 每个窗口一个全窗口弹层层（`EmbeddedPopupHost`），按使用者计数挂到 DecorView；不依赖悬浮层，没有弹层时不接收触摸；夹在安全区与键盘以上 | `DESIGN` |
+| 返回键 | 弹层打开时先关弹层：API 33+ 注册 `OnBackInvokedCallback`（PRIORITY_OVERLAY），其余靠持有焦点、在 `dispatchKeyEvent` 里处理 Back / Escape | `DESIGN` |
+| 与悬浮层的关系 | 视图在屏幕上时，这个分组不出现在悬浮面板里（`DialStore.floating`）；`getOpen()` 恒为 true，`setOpen()` 不起作用 | `DESIGN (user)` |
+| 构建类型 | 完整的 `dialkit` 在任何构建类型下都可用（需要时自行初始化存储）；`dialkit-noop` 的同名视图不绘制任何东西 | `DESIGN` |
+
+- 视图在 attach 时按 `group` 找到已注册的面板，并监听注册变化；`group` 没注册时显示一行提示，而不是空白。
+- Compose 的 `DialKitPanel` 是对 `DialPanelView` 的 `AndroidView` 包装。在 `LazyColumn` 里滚出可见范围足够远会被销毁，分组会暂时回到悬浮面板。
+
+---
+
 ## 6. 数据模型
 
 ### 6.1 声明

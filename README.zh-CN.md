@@ -23,6 +23,7 @@
 - [使用面板](#使用面板)
 - [调好之后落回代码](#调好之后落回代码)
 - [用代码控制面板](#用代码控制面板)
+- [页面内面板](#页面内面板)
 - [配置](#配置)
 - [常见问题](#常见问题)
 - [模块、示例与文档](#模块示例与文档)
@@ -203,6 +204,30 @@ val dials = rememberDialKit("Card", onAction = { path -> if (path == "reset") lo
 
 `id` 相同的面板共享同一组值，适合多个页面调同一个组件的场景。
 
+## 页面内面板
+
+有些应用会把调参做成一个独立的页面（一个 Activity 或 Fragment），而不是挂一个悬浮按钮。用 `DialPanelView`（View）或 `DialKitPanel`（Compose）把一个已注册的分组放进页面：
+
+```kotlin
+// View：在 Activity 里，或 Fragment 的 onViewCreated 里
+val dials = DialKit.panel(this, "Card") { CardDials() }
+findViewById<DialPanelView>(R.id.tuning).group = dials      // 或 DialPanelView(context).apply { group = dials }
+
+// Compose
+val dials = rememberDialKit("Card") { CardDials() }
+Column(Modifier.verticalScroll(rememberScrollState())) {
+    Preview(dials)
+    DialKitPanel(dials, Modifier.fillMaxWidth())
+}
+```
+
+- 显示分组名、工具栏（版本、Import、Copy）和控件，宽度占满，用面板底色平铺，没有描边、阴影和关闭按钮。
+- 高度设为 wrap 时随控件变高，由页面负责滚动；设为固定高度或 `match_parent` 时，标题和工具栏固定，控件在内部滚动。
+- 下拉、取色器等弹层浮在页面之上，返回键先关弹层。
+- 这个视图在屏幕上时，它的分组不再出现在悬浮面板里（其他分组照常）；`getOpen()` 恒为 `true`，`setOpen()` 不起作用。
+- 只要依赖的是完整的 `dialkit`，任何构建类型都能用；悬浮层仍然只在 debuggable 包里自动安装。换成 `dialkit-noop` 时什么都不显示。
+- 放在 `LazyColumn` 里时，滚得足够远的项会被销毁，分组会暂时回到悬浮面板里，滚回来后再离开；想避免这种情况就用普通的可滚动 `Column`。
+
 ## 配置
 
 全部可选。在 `Application.onCreate` 或启动 Activity 的 `onCreate` 里调用，要在它 resume 之前：
@@ -243,11 +268,11 @@ DialKit.configure {
 |---|---|---|
 | `dialkit` | DSL、浮层、手势、全部 UI、持久化 | kotlin-stdlib |
 | `dialkit-noop` | 相同的 API，不含 UI，给 release 包用 | kotlin-stdlib |
-| `dialkit-compose` | `rememberDialKit`、`toAnimationSpec()`、按值重组 | Compose runtime、animation-core |
+| `dialkit-compose` | `rememberDialKit`、`toAnimationSpec()`、`DialKitPanel`、按值重组 | Compose runtime、animation-core、ui |
 
 | 示例 | 内容 |
 |---|---|
-| [`samples/catalog`](samples/catalog) | 全部控件与面板功能，一屏一项（Compose） |
+| [`samples/catalog`](samples/catalog) | 全部控件与面板功能，一屏一项，包括 Compose 页面和 View 页面里的页面内面板 |
 | [`samples/compose`](samples/compose) | Compose 宿主，单个综合面板 |
 | [`samples/views`](samples/views) | 普通 `android.app.Activity`，用 View 方式监听 |
 
@@ -262,8 +287,9 @@ DialKit.configure {
 [DialKit](https://www.dialkit.dev/) 是 Josh Puckett 开发的 React 调参面板，以 MIT 许可证发布。DialKit for Android 是另一位作者的独立项目：一个非官方的原生 Android 移植，与 Josh Puckett 无关，也未经其认可。
 
 - **移植自 DialKit 2.0.2**：数据模型与配置规则、值格式与 JSON（参数值、版本、Copy）、数学计算（弹簧、缓动、颜色、Pad 吸附）、图标和视觉规格。这些部分在 Android 允许的范围内尽量忠实于 DialKit 源码。
+- **适配移植**：inline 模式改为按分组的页面内面板（`DialPanelView` / `DialKitPanel`），不在悬浮和页面之间切换。
 - **Android 自有**：宿主窗口内的浮层、入口按钮和全部手势、触感反馈、Import、输入法处理、无障碍、View 与 Compose 的 API，以及 `dialkit-noop`。
-- **没有移植**：inline 模式、`productionEnabled`、键盘快捷键、Shift 锁轴和 Timeline；每一项的理由以及跟进 DialKit 新版本的原则见 [docs/WEB_PARITY.md](docs/WEB_PARITY.md)。
+- **没有移植**：`productionEnabled`、键盘快捷键、Shift 锁轴和 Timeline；每一项的理由以及跟进 DialKit 新版本的原则见 [docs/WEB_PARITY.md](docs/WEB_PARITY.md)。
 
 DialKit 的版权声明随每个构件一起分发（`META-INF/<模块名>-NOTICES.txt`），也写在 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 里。本仓库不包含 DialKit 自身的源码；移植对照的是 DialKit 2.0.2（[npm](https://www.npmjs.com/package/dialkit/v/2.0.2)、[源码](https://github.com/joshpuckett/dialkit)）。标题栏拖拽点阵的比例以 [Leva](https://github.com/pmndrs/leva)（MIT）为起点，没有包含 Leva 的代码。
 

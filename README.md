@@ -23,6 +23,7 @@ A live tuning panel for Android demos, modelled on [DialKit](https://www.dialkit
 - [Use the panel](#use-the-panel)
 - [From tuning back to code](#from-tuning-back-to-code)
 - [Control the panel from code](#control-the-panel-from-code)
+- [Panel in a page](#panel-in-a-page)
 - [Configure](#configure)
 - [Troubleshooting](#troubleshooting)
 - [Modules, samples and docs](#modules-samples-and-docs)
@@ -203,6 +204,30 @@ val dials = rememberDialKit("Card", onAction = { path -> if (path == "reset") lo
 
 Panels with the same `id` share one set of values, which helps when several screens tune the same component.
 
+## Panel in a page
+
+Some apps keep their tuning on a screen of its own, an Activity or a Fragment, instead of a floating button. Show a registered group there with `DialPanelView` (Views) or `DialKitPanel` (Compose):
+
+```kotlin
+// Views: in an Activity, or a Fragment's onViewCreated
+val dials = DialKit.panel(this, "Card") { CardDials() }
+findViewById<DialPanelView>(R.id.tuning).group = dials      // or DialPanelView(context).apply { group = dials }
+
+// Compose
+val dials = rememberDialKit("Card") { CardDials() }
+Column(Modifier.verticalScroll(rememberScrollState())) {
+    Preview(dials)
+    DialKitPanel(dials, Modifier.fillMaxWidth())
+}
+```
+
+- It shows the group's name, the toolbar (versions, Import, Copy) and the controls, full width on the panel background, with no border, shadow or close button.
+- With a wrap-content height it grows with its controls and your page scrolls them; with a fixed or `match_parent` height the header stays and the controls scroll inside.
+- Pickers and menus float above the page, and Back closes an open one first.
+- While the view is on screen, its group is left out of the floating panel (other groups stay there), `getOpen()` is `true` and `setOpen()` does nothing.
+- It works in any build type that uses the full `dialkit` artifact; the floating overlay still installs only in debuggable builds. With `dialkit-noop` it draws nothing.
+- In a `LazyColumn`, an item scrolled far enough away is disposed, and the group returns to the floating panel until it comes back; use a plain scrolling `Column` to keep it.
+
 ## Configure
 
 All optional. Call it in `Application.onCreate` or the launcher Activity's `onCreate`, before it resumes:
@@ -243,11 +268,11 @@ To install manually, remove `io.github.lixiaolin94.dialkit.DialKitInitProvider` 
 |---|---|---|
 | `dialkit` | DSL, overlay, gestures, all UI, persistence | kotlin-stdlib |
 | `dialkit-noop` | The same API with no UI, for release builds | kotlin-stdlib |
-| `dialkit-compose` | `rememberDialKit`, `toAnimationSpec()`, value-level recomposition | Compose runtime, animation-core |
+| `dialkit-compose` | `rememberDialKit`, `toAnimationSpec()`, `DialKitPanel`, value-level recomposition | Compose runtime, animation-core, ui |
 
 | Sample | What it shows |
 |---|---|
-| [`samples/catalog`](samples/catalog) | Every control and panel feature, one screen each (Compose) |
+| [`samples/catalog`](samples/catalog) | Every control and panel feature, one screen each, including panels in a Compose and a Views page |
 | [`samples/compose`](samples/compose) | A Compose host with a single playground panel |
 | [`samples/views`](samples/views) | A plain `android.app.Activity` with View-based observation |
 
@@ -262,8 +287,9 @@ Install the catalog with `./gradlew :samples:catalog:installDebug`.
 [DialKit](https://www.dialkit.dev/) is a React tuning panel by Josh Puckett, released under the MIT License. DialKit for Android is a separate project by a different author: an unofficial port to native Android, not affiliated with or endorsed by Josh Puckett.
 
 - **Ported from DialKit 2.0.2:** the data model and config rules, value formats and JSON (values, versions, Copy), the maths (springs, easing, colour, pad snapping), the icons and the visual specification. These follow DialKit's source as closely as Android allows.
+- **Adapted:** inline mode becomes a per-group panel in a page (`DialPanelView` / `DialKitPanel`), without switching between floating and inline.
 - **Android's own:** the overlay inside the host window, the entry button and every gesture, haptics, Import, IME handling, accessibility, the Views and Compose APIs, and `dialkit-noop`.
-- **Not ported:** inline mode, `productionEnabled`, keyboard shortcuts, Shift axis locking and Timeline; [docs/WEB_PARITY.md](docs/WEB_PARITY.md) lists each with the reason, and the rules for following future DialKit releases.
+- **Not ported:** `productionEnabled`, keyboard shortcuts, Shift axis locking and Timeline; [docs/WEB_PARITY.md](docs/WEB_PARITY.md) lists each with the reason, and the rules for following future DialKit releases.
 
 DialKit's copyright notice ships inside every artifact (`META-INF/<module>-NOTICES.txt`) and in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). DialKit's own source is not included in this repository; the port follows DialKit 2.0.2 ([npm](https://www.npmjs.com/package/dialkit/v/2.0.2), [source](https://github.com/joshpuckett/dialkit)). The title-bar handle's proportions start from [Leva](https://github.com/pmndrs/leva)'s (MIT); no Leva code is included.
 

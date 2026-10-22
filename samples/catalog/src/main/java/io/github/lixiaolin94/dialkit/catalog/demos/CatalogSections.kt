@@ -34,4 +34,11 @@ internal val catalogSections: List<CatalogSection> = listOf(
             Demo("host", "Host gestures", "Taps, pinch and scrolling still reach the app.", ::HostGesturesDemo),
         ),
     ),
+    CatalogSection(
+        "In a page",
+        listOf(
+            Demo("page", "Panel in a page", "The panel as part of a Compose screen, scrolling with the page.", ::PagePanelDemo),
+            Demo("views-page", "Panel in a Views screen", "A fixed-height DialPanelView in a plain Activity.", ::ViewsPageDemo),
+        ),
+    ),
 )

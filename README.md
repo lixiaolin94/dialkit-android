@@ -8,7 +8,7 @@ A live tuning panel for Android demos, modelled on [DialKit](https://www.dialkit
 
 > An unofficial, independent port. It is not affiliated with or endorsed by Josh Puckett or the DialKit project; see [Relationship to DialKit](#relationship-to-dialkit).
 
-- **No runtime dependencies.** The library ships only Kotlin code and resources (about 84 KB of dex after R8). No AndroidX, no Compose, no coroutines.
+- **No runtime dependencies.** The library ships only Kotlin code and resources (about 92 KB of dex after R8). No AndroidX, no Compose, no coroutines.
 - **No overlay permission.** The panel lives inside each Activity's own window, above your content, and never steals your touches or gestures.
 - **Drop-in.** It installs itself in debuggable builds; swap in `dialkit-noop` for release builds, which keeps the same API and returns the declared defaults.
 - **Views and Compose.** Compose hosts add the small `dialkit-compose` adapter and recompose only when a value they read changes.
@@ -165,6 +165,7 @@ dials.observe(this) { d ->
 | Versions | The menu on the left of the toolbar: "Version 1" holds the base values, "New version" saves the current values as a new one |
 | Copy | Copies the values as DialKit JSON plus Kotlin declarations, and logs them under `adb logcat -s DialKit` |
 | Import | Paste DialKit JSON from the clipboard or a file; the values land in a new version. Over adb: add `--es cmd import --es json '<JSON>'` to the broadcast |
+| Other adb commands | Add `--es cmd show`, `hide`, `open` or `close` to the broadcast. adb commands exist in debuggable builds only |
 | Read values from a computer | Add `--es cmd dump` to the broadcast, then `adb logcat -d -v raw -s DialKit`: the same text as Copy, for every registered panel (or `--es id <id>` for one) |
 
 With several groups on one screen, the panel shows each as a section. The entry remembers whether it was visible, so it comes back after a restart.
@@ -258,7 +259,7 @@ To install manually, remove `io.github.lixiaolin94.dialkit.DialKitInitProvider` 
 
 | Problem | What to check |
 |---|---|
-| Nothing appears | The entry starts hidden: double-tap with three fingers, or set `entryVisibleByDefault = true`. The panel exists only in debuggable builds that use `dialkit`, not `dialkit-noop`. |
+| Nothing appears | The entry starts hidden: double-tap with three fingers, or set `entryVisibleByDefault = true`. The floating panel exists only in debuggable builds that use `dialkit`, not `dialkit-noop`, and not with `floatingPanel = false`. |
 | The three-finger gesture does nothing | Some ROMs use three-finger gestures for screenshots. Use Ctrl+Shift+D, the adb broadcast, `DialKit.showEntry()`, or `ToggleGesture.ThreeFingerLongPress()`. |
 | The panel says "No dials registered on this screen" | No group is registered at the moment: call `rememberDialKit` or `DialKit.panel` from the screen you want to tune. |
 | `Could not find com.github.lixiaolin94…` | Add `maven("https://jitpack.io")` to `dependencyResolutionManagement.repositories`. |

@@ -8,7 +8,7 @@
 
 > 这是非官方的独立移植，与 Josh Puckett 及 DialKit 项目无关，也未经其认可；详见[与 DialKit 的关系](#与-dialkit-的关系)。
 
-- **零运行时依赖**：库里只有 Kotlin 代码和资源，R8 后约 84 KB dex；不带 AndroidX、Compose 和协程。
+- **零运行时依赖**：库里只有 Kotlin 代码和资源，R8 后约 92 KB dex；不带 AndroidX、Compose 和协程。
 - **不需要悬浮窗权限**：面板挂在每个 Activity 自己的窗口里，浮在内容上方，不抢宿主的触摸和手势。
 - **一行接入**：只在 debuggable 包里自动安装；release 包换成 `dialkit-noop`，API 相同，返回声明时的默认值。
 - **View 和 Compose 都能用**：Compose 宿主再加一个很小的 `dialkit-compose`，读到哪个值，就只在那个值变化时重组。
@@ -165,6 +165,7 @@ dials.observe(this) { d ->
 | 版本 | 工具栏左侧的菜单："Version 1" 是基础值，"New version" 把当前值另存为新版本 |
 | Copy | 把参数复制成 DialKit JSON，外加 Kotlin 声明；同时输出到 `adb logcat -s DialKit` |
 | Import | 从剪贴板或文件粘贴 DialKit JSON，导入的值会存成一个新版本。adb 方式：在上面的广播后加 `--es cmd import --es json '<JSON>'` |
+| 其他 adb 命令 | 在上面的广播后加 `--es cmd show`、`hide`、`open` 或 `close`。adb 命令只在 debuggable 包里存在 |
 | 在电脑上读出当前值 | 在上面的广播后加 `--es cmd dump`，再运行 `adb logcat -d -v raw -s DialKit`：内容和 Copy 一样，包含所有已注册的面板（加 `--es id <id>` 只输出一个） |
 
 一个页面上注册了多个分组时，面板里每个分组是一个分区。入口会记住自己是否显示，重启应用后保持原状。
@@ -258,7 +259,7 @@ DialKit.configure {
 
 | 问题 | 排查 |
 |---|---|
-| 什么都没出现 | 入口默认是隐藏的：三指双击，或者设置 `entryVisibleByDefault = true`。面板只在用了 `dialkit`（不是 `dialkit-noop`）的 debuggable 包里存在。 |
+| 什么都没出现 | 入口默认是隐藏的：三指双击，或者设置 `entryVisibleByDefault = true`。悬浮面板只在用了 `dialkit`（不是 `dialkit-noop`）的 debuggable 包里存在，设置了 `floatingPanel = false` 时也不会出现。 |
 | 三指双击没反应 | 有些 ROM 把三指手势占给了截屏。改用 Ctrl+Shift+D、adb 广播、`DialKit.showEntry()`，或 `ToggleGesture.ThreeFingerLongPress()`。 |
 | 面板显示 "No dials registered on this screen" | 当前没有注册任何分组：在要调的页面上调用 `rememberDialKit` 或 `DialKit.panel`。 |
 | `Could not find com.github.lixiaolin94…` | 在 `dependencyResolutionManagement.repositories` 里加上 `maven("https://jitpack.io")`。 |

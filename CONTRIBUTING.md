@@ -147,7 +147,8 @@ scripts/check-commits.py origin/main..HEAD    # CI runs the same check on pushes
 - [Semantic Versioning](https://semver.org/). While the version is `0.x`, a breaking change raises the minor
   version (`0.1.0`), anything else the patch version (`0.0.2`).
 - Breaking: removing or renaming public API, changing a signature, changing behaviour that callers rely on (for
-  example a declaration that used to be accepted now throwing), changing the persisted JSON shape.
+  example a declaration that used to work now throwing; rejecting one that could only crash later is a fix),
+  changing the persisted JSON shape.
 - [`CHANGELOG.md`](CHANGELOG.md) follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Every user-visible
   change adds a line under `## [Unreleased]` (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`) in
   the same commit. Internal refactors, tests and CI need no entry.

@@ -311,7 +311,7 @@ class CardDials : DialGroup() {
 
 | 控件 | 规格要点 |
 |---|---|
-| Slider | 整行就是轨道：高 36、圆角 8、底色 surface、填充 surface-active。手柄是 3×20 的竖条，left = `max(5, pct − 9)`；未激活时 scaleX .25、透明，按下时 scaleX 1、不透明度 .9；压到 label 或 value 上时淡出。label 左 10、value 右 12，13sp/500。刻度线 1×8：档数 ≤ 10 时每档一根，否则画十分位线，只在激活时显示。 |
+| Slider | 整行就是轨道：高 36、圆角 8、底色 surface、填充 surface-active。手柄是 3×20 的竖条，left = `max(5, pct − 9)`；未激活时 scaleX .25、透明，按下时 scaleX 1、不透明度 .9；压到 label 或 value 上时淡出。label 左 10、value 右 12，13sp/500。刻度线 1×8：档数 ≤ 10 时每档一根，数量为 `trunc(档数 − 1)`，所以不整除时最后那段短档没有刻度（`SOURCE` Slider.tsx:354-356 `Array.from({ length: discreteSteps − 1 })`）；否则画十分位线，只在激活时显示。`DESIGN`：档数按十进制计算，0..0.3 步长 0.1 是 3 档、2 根刻度，而不是 JS 里 0.3 / 0.1 = 2.9999999999999996 得到的 1 根。 |
 | Slider 输入数值 | `SOURCE`：数值悬停 800ms 后可点开输入，Enter 提交、Escape 取消、失焦提交；提交时 parseFloat → clamp → roundValue，无法解析时保持原值；输入框右 12、3–6ch、13/500 等宽、1px 下划线。`DESIGN`：触屏没有悬停，改为在行上静止长按（系统长按时长）打开输入框；返回键和外接键盘的 Esc 对应 Escape（API 33 以上返回手势先交给输入法收起键盘，所以编辑中键盘被收起即视为取消）；长按触发 `LONG_PRESS` 触感，这次抬手不算点按；外接键盘 Enter 在按键抬起时才打开输入框，否则输入框会把这次抬起当作完成。 |
 | Slider 交互 | 绝对定位：值 = min + (x/宽)·range，拖动时按 step 取整。单击：档数 ≤ 10 吸附到最近档，否则吸附十分位（±0.03125），填充用弹簧过渡：DialKit 是物理弹簧 (300, 25, 0.8)，换算成 spring(≈0.270, ≈0.193)，统一按 0.05 取整为 spring(0.25, 0.2)（`DESIGN (user)`；点按、键盘、读屏、输入数值共用）。越界超过 32 的死区后拉伸 `8·√min((越界−32)/200, 1)`，回弹 spring(0.35, 0.15)。`DESIGN`：横向超过 slop 才开始拖动并禁止父容器拦截，竖向留给面板滚动；抬手时用 UP 的位置再更新一次。 |
 | Toggle | Off/On 分段控件，不是开关轨道。行高 36，padding 2/10/2/12；分段容器 padding 2，右侧 margin −6；选中块圆角 6、surface-active，left/width 用 0.2s `cubic(.25,1,.5,1)` 过渡。 |

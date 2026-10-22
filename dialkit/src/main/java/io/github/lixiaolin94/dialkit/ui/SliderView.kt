@@ -21,11 +21,11 @@ import android.widget.FrameLayout
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.roundToInt
 import kotlin.math.sqrt
 import io.github.lixiaolin94.dialkit.R
 import io.github.lixiaolin94.dialkit.model.ControlKey
 import io.github.lixiaolin94.dialkit.model.formatSliderValue
+import io.github.lixiaolin94.dialkit.model.hashMarkFractions
 import io.github.lixiaolin94.dialkit.model.sliderKeyValue
 import io.github.lixiaolin94.dialkit.model.roundValue
 import io.github.lixiaolin94.dialkit.model.snapToDecile
@@ -65,6 +65,7 @@ internal class SliderView(
     private val write: (Float) -> Unit,
 ) : FrameLayout(context) {
     private val range = (max - min).takeIf { it > 0f } ?: 1f
+    private val hashMarks = hashMarkFractions(min, max, step)
     private val slop = ViewConfiguration.get(context).scaledTouchSlop
     private var lastWritten = 0f
     private var atLimit = false
@@ -206,8 +207,7 @@ internal class SliderView(
 
         // Hash marks: every step when ≤ 10 positions, otherwise tenths, shown while active.
         paint.color = lerpColor(withAlpha(palette.borderHover, 0f), palette.borderHover, hashColor.value)
-        val discrete = range / step
-        val marks = if (discrete <= 10f) (1 until discrete.roundToInt()).map { it * step / range } else (1..9).map { it / 10f }
+        val marks = hashMarks
         val markW = dp(1f)
         val markH = dp(8f)
         for (p in marks) {

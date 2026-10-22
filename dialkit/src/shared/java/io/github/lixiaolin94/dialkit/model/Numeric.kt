@@ -3,6 +3,7 @@ package io.github.lixiaolin94.dialkit.model
 import java.math.BigDecimal
 import java.math.MathContext
 import kotlin.math.abs
+import kotlin.math.floor
 import kotlin.math.roundToLong
 
 // Ports of DialKit's numeric rules. Every constant here is SOURCE unless tagged otherwise.
@@ -52,6 +53,21 @@ internal fun inferRange(value: Float): InferredRange = when {
 }
 
 private fun Float.orIfZero(fallback: Float) = if (this == 0f) fallback else this
+
+/**
+ * Hash-mark positions as fractions of the track. SOURCE Slider.tsx:354-356: with ≤ 10 discrete steps there is one
+ * mark per step, `Array.from({ length: discreteSteps - 1 })` (the length truncates, so an uneven last step has no
+ * mark), otherwise the nine tenths. DESIGN: the step count is taken in decimal, so 0..0.3 by 0.1 has two marks
+ * rather than JS's one (0.3 / 0.1 = 2.9999999999999996 there).
+ */
+internal fun hashMarkFractions(min: Float, max: Float, step: Float): List<Float> {
+    val range = max - min
+    if (!(range > 0f) || !(step > 0f)) return emptyList()
+    val discrete = decimal(max).subtract(decimal(min)).divide(decimal(step), MathContext.DECIMAL64).toDouble()
+    if (discrete > 10.0) return (1..9).map { it / 10f }
+    val count = floor(discrete - 1).toInt().coerceAtLeast(0)
+    return (1..count).map { it * step / range }
+}
 
 /** SOURCE shortcut-utils.ts:snapToDecile — magnetic snap to tenths within ±0.03125. */
 internal fun snapToDecile(raw: Float, min: Float, max: Float): Float {

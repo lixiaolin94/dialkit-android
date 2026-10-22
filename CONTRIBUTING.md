@@ -13,6 +13,16 @@ Requirements: JDK 17 and the Android SDK (compileSdk 35).
 ./gradlew :samples:views:installDebug    # View sample (plain android.app.Activity)
 ```
 
+Device tests (`dialkit/src/androidTest`: store lifecycle, persistence, in-page panels, `floatingPanel = false`) need
+an unlocked device. With several devices attached, install and run them on one with `adb -s` rather than
+`connectedAndroidTest`, which targets every device:
+
+```bash
+./gradlew :dialkit:assembleDebugAndroidTest
+adb -s <serial> install -r -t dialkit/build/outputs/apk/androidTest/debug/dialkit-debug-androidTest.apk
+adb -s <serial> shell am instrument -w io.github.lixiaolin94.dialkit.test/androidx.test.runner.AndroidJUnitRunner
+```
+
 `./gradlew :samples:views:assembleMeasure` builds the View sample with R8 and without obfuscation, for measuring
 what DialKit adds to an APK (`apkanalyzer dex packages`).
 

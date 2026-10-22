@@ -7,6 +7,8 @@ extensions.configure<com.android.build.api.dsl.LibraryExtension> {
     namespace = "io.github.lixiaolin94.dialkit"
     // Shared with :dialkit-noop: the DSL, value cells and model (no overlay, store or UI).
     sourceSets.getByName("main").kotlin.directories.add("src/shared/java")
+    // Device tests (src/androidTest): store lifecycle, persistence, in-page panels, floatingPanel = false.
+    defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 }
 
 dependencies {
@@ -19,4 +21,7 @@ dependencies {
     testImplementation(libs.junit)
     // android.jar's org.json is stubbed in local unit tests; the real implementation for the import tests.
     testImplementation(libs.org.json)
+
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.junit)
 }

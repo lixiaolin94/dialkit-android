@@ -1,0 +1,13 @@
+
+
+# <type>(<scope>): <subject>          ← at most 72 characters, ASCII
+#   type:  feat fix perf refactor test docs build ci chore style revert
+#   scope: dsl store overlay panel page slider color pad transition image import adb noop compose
+#          catalog embedded samples release deps (optional)
+#   subject: imperative, lowercase first word, no trailing period
+#
+# Body: what changed and why, wrapped at 100 columns. One logical change per commit; it builds and
+# passes the unit tests on its own. User-visible? Add a CHANGELOG [Unreleased] line in this commit.
+#
+# Footers: BREAKING CHANGE: <what to change>   Fixes #<issue>   Co-authored-by: <name> <email>
+# Full rules: CONTRIBUTING.md → Commits

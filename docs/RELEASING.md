@@ -30,7 +30,7 @@ com.github.lixiaolin94.dialkit-android:dialkit-noop:<tag>
 com.github.lixiaolin94.dialkit-android:dialkit-compose:<tag>
 ```
 
-Tags are plain version numbers (`0.0.1`, not `v0.0.1`), because the tag is the version consumers write.
+Tags are plain version numbers (`0.0.2`, not `v0.0.2`), because the tag is the version consumers write.
 
 Maven Central remains possible later, with the `io.github.lixiaolin94` coordinates already in
 [`gradle.properties`](../gradle.properties); see [Optional: Maven Central](#optional-maven-central).
@@ -51,7 +51,7 @@ Maven Central remains possible later, with the `io.github.lixiaolin94` coordinat
    [`README.zh-CN.md`](../README.zh-CN.md), and moves the [`CHANGELOG.md`](../CHANGELOG.md) entries under
    `## [Unreleased]` into `## [<version>] - <today>`. It neither commits nor tags. Do this only right before the
    tag: until the version is on JitPack, the README would point at coordinates that do not resolve.
-2. Review with `git diff`, commit on `main` and push. Wait for the CI workflow to pass at
+2. Review with `git diff`, commit on `main` as `chore(release): <version>` (CONTRIBUTING.md → Commits) and push. Wait for the CI workflow to pass at
    <https://github.com/lixiaolin94/dialkit-android/actions>.
 
 ### 2. Verify locally
@@ -59,7 +59,7 @@ Maven Central remains possible later, with the `io.github.lixiaolin94` coordinat
 Run what JitPack will run:
 
 ```bash
-./gradlew :dialkit:publishToMavenLocal :dialkit-noop:publishToMavenLocal :dialkit-compose:publishToMavenLocal -PsignAllPublications=false -PGROUP=com.github.lixiaolin94.dialkit-android -PVERSION_NAME=0.0.1
+./gradlew :dialkit:publishToMavenLocal :dialkit-noop:publishToMavenLocal :dialkit-compose:publishToMavenLocal -PsignAllPublications=false -PGROUP=com.github.lixiaolin94.dialkit-android -PVERSION_NAME=<version>
 ```
 
 Each module in `~/.m2/repository/com/github/lixiaolin94/dialkit-android/` should have an `.aar`, `-sources.jar`,
@@ -68,21 +68,21 @@ Each module in `~/.m2/repository/com/github/lixiaolin94/dialkit-android/` should
 ### 3. Tag and push
 
 ```bash
-git tag 0.0.1
-git push origin 0.0.1
+git tag <version>
+git push origin <version>
 ```
 
 ### 4. Build on JitPack
 
 1. Open <https://jitpack.io/#lixiaolin94/dialkit-android>, find the tag under **Releases** and choose **Get it**.
    That starts the build; any request for the tag's POM does the same:
-   <https://jitpack.io/com/github/lixiaolin94/dialkit-android/dialkit/0.0.1/dialkit-0.0.1.pom>.
+   <https://jitpack.io/com/github/lixiaolin94/dialkit-android/dialkit/<version>/dialkit-<version>.pom>.
 2. The build takes a few minutes. The log icon next to the tag shows its output; the build log is also at
-   <https://jitpack.io/com/github/lixiaolin94/dialkit-android/0.0.1/build.log>.
+   <https://jitpack.io/com/github/lixiaolin94/dialkit-android/<version>/build.log>.
 3. When it is green, check that all three modules resolve, for example from a scratch project, or with:
 
    ```bash
-   curl -sI https://jitpack.io/com/github/lixiaolin94/dialkit-android/dialkit-compose/0.0.1/dialkit-compose-0.0.1.aar
+   curl -sI https://jitpack.io/com/github/lixiaolin94/dialkit-android/dialkit-compose/<version>/dialkit-compose-<version>.aar
    ```
 
 ### 5. Announce
@@ -91,7 +91,7 @@ Create a GitHub release for the tag at <https://github.com/lixiaolin94/dialkit-a
 version's `CHANGELOG.md` section as the notes:
 
 ```bash
-gh release create 0.0.1 --title 0.0.1 --notes-file <file with the changelog section>
+gh release create <version> --title <version> --notes-file <file with the changelog section>
 ```
 
 ## Troubleshooting JitPack
@@ -100,7 +100,7 @@ gh release create 0.0.1 --title 0.0.1 --notes-file <file with the changelog sect
 |---|---|
 | The build log shows a Gradle or SDK error | Reproduce with the command in [step 2](#2-verify-locally), fix on `main`, then move the tag (below). |
 | A broken build is cached | JitPack keeps failed builds. After fixing, delete the build on the JitPack page (the bin icon next to the tag, when signed in with GitHub) or push a new tag. |
-| The tag points to the wrong commit | `git tag -d 0.0.1`, `git push origin :refs/tags/0.0.1`, tag the right commit and push again, then delete the cached build on JitPack. Prefer a new version once anyone may have downloaded the old one. |
+| The tag points to the wrong commit | `git tag -d <version>`, `git push origin :refs/tags/<version>`, tag the right commit and push again, then delete the cached build on JitPack. Prefer a new version once anyone may have downloaded the old one. |
 | Consumers get "Could not find com.github.…" | Their build is missing `maven("https://jitpack.io")` in `dependencyResolutionManagement.repositories`. |
 
 ## Optional: Maven Central
@@ -130,7 +130,7 @@ consumers, at the cost of an account, a signing key and a manual publish step. T
 ### Publishing a version
 
 1. Prepare and tag the version as for JitPack.
-2. Run the workflow: `gh workflow run release.yml -R lixiaolin94/dialkit-android -f version=0.0.1`, or use
+2. Run the workflow: `gh workflow run release.yml -R lixiaolin94/dialkit-android -f version=<version>`, or use
    **Run workflow** at <https://github.com/lixiaolin94/dialkit-android/actions/workflows/release.yml>.
 3. At <https://central.sonatype.com/publishing/deployments>, wait for **Validated**, check the files, then choose
    **Publish**. Automatic publishing is off, so this is the last chance to stop: a version on Central can never be

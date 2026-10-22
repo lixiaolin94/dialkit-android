@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- `DialKitConfig.floatingPanel = false` turns the floating panel off entirely, for apps that tune only in their
+  own screens with in-page panels.
 - Panel in a page: `DialPanelView` (Views) and `DialKitPanel` (Compose) show a registered group as part of a
   screen, like DialKit's inline mode; while shown, the group is left out of the floating panel.
 - `adb shell am broadcast … --es cmd dump [--es id <panel>]` writes Copy's text (JSON and Kotlin) to logcat, so

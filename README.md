@@ -226,6 +226,7 @@ Column(Modifier.verticalScroll(rememberScrollState())) {
 - Pickers and menus float above the page, and Back closes an open one first.
 - While the view is on screen, its group is left out of the floating panel (other groups stay there), `getOpen()` is `true` and `setOpen()` does nothing.
 - It works in any build type that uses the full `dialkit` artifact; the floating overlay still installs only in debuggable builds. With `dialkit-noop` it draws nothing.
+- For an app that tunes only in its own screens, turn the floating panel off entirely with `DialKit.configure { floatingPanel = false }` (see [`samples/embedded`](samples/embedded)): nothing is added to your Activities, and the gesture, shortcut and adb `toggle` do nothing; adb `dump` and `import` still work.
 - In a `LazyColumn`, an item scrolled far enough away is disposed, and the group returns to the floating panel until it comes back; use a plain scrolling `Column` to keep it.
 
 ## Configure
@@ -236,6 +237,7 @@ All optional. Call it in `Application.onCreate` or the launcher Activity's `onCr
 DialKit.configure {
     entryVisibleByDefault = true                            // show the entry on first launch, no gesture needed
     entryButton = false                                     // no entry button: open with DialKit.open() / setOpen(true)
+    floatingPanel = false                                   // no floating panel at all: in-page panels only
     toggleGesture = ToggleGesture.ThreeFingerLongPress()    // or ToggleGesture.None
     keyShortcut = null                                      // turn off Ctrl+Shift+D
     entryPosition = DialPosition.BottomEnd                  // where the entry first appears (default TopEnd)

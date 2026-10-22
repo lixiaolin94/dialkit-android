@@ -16,6 +16,11 @@ internal class ActivityTracker(private val config: DialKitConfig) : Application.
 
     override fun onActivityResumed(activity: Activity) {
         if (activity is DialKitPickerActivity) return // DialKit's own trampoline: no overlay, no gesture hook
+        if (!config.floatingPanel) {
+            // DESIGN: in-page panels only; nothing goes into the host's window.
+            attachments.remove(activity)?.detach()
+            return
+        }
         OverlayController.start()
         attachments.getOrPut(activity) { ActivityAttachment(activity, config) }.attach()
     }

@@ -226,6 +226,7 @@ Column(Modifier.verticalScroll(rememberScrollState())) {
 - 下拉、取色器等弹层浮在页面之上，返回键先关弹层。
 - 这个视图在屏幕上时，它的分组不再出现在悬浮面板里（其他分组照常）；`getOpen()` 恒为 `true`，`setOpen()` 不起作用。
 - 只要依赖的是完整的 `dialkit`，任何构建类型都能用；悬浮层仍然只在 debuggable 包里自动安装。换成 `dialkit-noop` 时什么都不显示。
+- 如果应用只在自己的页面里调参，可以用 `DialKit.configure { floatingPanel = false }` 彻底关掉悬浮面板（见 [`samples/embedded`](samples/embedded)）：不会往 Activity 里注入任何东西，手势、快捷键和 adb `toggle` 都不起作用；adb `dump` 和 `import` 照常可用。
 - 放在 `LazyColumn` 里时，滚得足够远的项会被销毁，分组会暂时回到悬浮面板里，滚回来后再离开；想避免这种情况就用普通的可滚动 `Column`。
 
 ## 配置
@@ -236,6 +237,7 @@ Column(Modifier.verticalScroll(rememberScrollState())) {
 DialKit.configure {
     entryVisibleByDefault = true                            // 首次启动就显示入口，不用手势
     entryButton = false                                     // 不显示入口按钮：用 DialKit.open() / setOpen(true) 打开
+    floatingPanel = false                                   // 完全不要悬浮面板，只用页面内面板
     toggleGesture = ToggleGesture.ThreeFingerLongPress()    // 或 ToggleGesture.None
     keyShortcut = null                                      // 关闭 Ctrl+Shift+D
     entryPosition = DialPosition.BottomEnd                  // 入口首次出现的位置（默认 TopEnd）

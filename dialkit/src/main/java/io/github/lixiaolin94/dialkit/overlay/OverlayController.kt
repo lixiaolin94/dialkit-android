@@ -4,6 +4,7 @@ import io.github.lixiaolin94.dialkit.DialKitConfig
 import io.github.lixiaolin94.dialkit.DialPosition
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import java.util.concurrent.CopyOnWriteArrayList
 
 internal enum class OverlayMode { Hidden, Entry, Expanded }
@@ -46,6 +47,7 @@ internal object OverlayController {
         private set
 
     private var config: DialKitConfig? = null
+    private var warnedOff = false
     private var resolved = false
 
     /** At install (from the init provider, before Application.onCreate): storage only, no state yet. */
@@ -97,6 +99,11 @@ internal object OverlayController {
     }
 
     fun transitionTo(requested: OverlayMode) {
+        if (requested != OverlayMode.Hidden && config?.floatingPanel == false) {
+            if (!warnedOff) Log.i("DialKit", "floatingPanel = false: there is no floating panel; show groups with DialPanelView / DialKitPanel")
+            warnedOff = true
+            return
+        }
         resolve(explicit = true)
         val next = if (requested == OverlayMode.Entry && !hasEntry) OverlayMode.Hidden else requested
         if (mode == next) return

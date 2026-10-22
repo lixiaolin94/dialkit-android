@@ -23,6 +23,14 @@ public class DialKitConfig internal constructor() {
     public var entryButton: Boolean = true
 
     /**
+     * Whether DialKit has a floating panel at all. With false (DESIGN) nothing is added to the host's Activities: no
+     * entry, no toggle gesture or key shortcut, and showing it from code or adb (`toggle`, `show`, `open`) does
+     * nothing. Groups are tuned only where the host shows them, with `DialPanelView` / `DialKitPanel`; adb `dump`
+     * and `import` keep working. Read when each Activity resumes.
+     */
+    public var floatingPanel: Boolean = true
+
+    /**
      * Corner the entry first appears in (DialKit `position`, default top-right). After the entry has been
      * dragged, its last spot wins.
      */

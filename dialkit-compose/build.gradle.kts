@@ -16,4 +16,6 @@ dependencies {
     api(platform(libs.androidx.compose.bom))
     api(libs.androidx.compose.runtime)
     api(libs.androidx.compose.animation.core)
+    // AndroidView, for DialKitPanel (the in-page panel).
+    implementation(libs.androidx.compose.ui)
 }

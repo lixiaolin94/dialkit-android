@@ -10,10 +10,13 @@ import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
 import java.util.WeakHashMap
 import io.github.lixiaolin94.dialkit.DialCell
 import io.github.lixiaolin94.dialkit.DialGroup
 import io.github.lixiaolin94.dialkit.DialKit
+import io.github.lixiaolin94.dialkit.DialPanelView
 import io.github.lixiaolin94.dialkit.DialPersist
 import io.github.lixiaolin94.dialkit.DialRegistration
 import io.github.lixiaolin94.dialkit.DialTransition
@@ -75,4 +78,23 @@ public fun <T> DialTransition.toAnimationSpec(visibilityThreshold: T? = null): F
     } else {
         spring(dampingRatio!!, stiffness!!, visibilityThreshold)
     }
+}
+
+/**
+ * A group's panel as part of the screen instead of the floating overlay (DialKit `mode: 'inline'`): the group's
+ * name, the toolbar and its controls, full width. In a scrolling column it grows with its controls; given a fixed
+ * height it scrolls inside. While shown, the group is left out of the floating overlay. Draws nothing with
+ * `dialkit-noop`. See `DialPanelView`.
+ *
+ * ```
+ * val dials = rememberDialKit("Card") { CardDials() }
+ * Column(Modifier.verticalScroll(rememberScrollState())) {
+ *     Preview(dials)
+ *     DialKitPanel(dials)
+ * }
+ * ```
+ */
+@Composable
+public fun DialKitPanel(group: DialGroup, modifier: Modifier = Modifier) {
+    AndroidView(factory = { DialPanelView(it) }, modifier = modifier, update = { it.group = group })
 }

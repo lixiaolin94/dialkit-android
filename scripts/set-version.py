@@ -6,7 +6,8 @@
 
 Updates VERSION_NAME in gradle.properties, versionName in every samples/*/build.gradle.kts, the dependency
 coordinates in README.md and README.zh-CN.md, and moves CHANGELOG.md's [Unreleased] entries under
-`## [<version>] - <today>`, leaving an empty [Unreleased] above. It changes nothing else and never commits or tags.
+`## [<version>] - <today>`, leaving an empty [Unreleased] above, and updates the compare links at the bottom. It
+changes nothing else and never commits or tags.
 """
 from __future__ import annotations
 
@@ -43,6 +44,17 @@ def changelog(path: pathlib.Path, version: str) -> tuple[str, str, int]:
     section = f"{head}\n## [{version}] - {today}\n\n{body}\n"
     rest = old[end + 1:] if end != -1 else ""
     new = old[:old.index(head)] + section + ("\n" + rest if rest else "")
+    # Keep a Changelog compare links: [Unreleased] now starts at this version, which compares with the previous one.
+    link = re.search(r"^\[Unreleased\]: (?P<base>\S+/compare/)(?P<prev>[^.\s][^\s]*?)\.\.\.HEAD$", new, flags=re.M)
+    if link:
+        base, prev = link.group("base"), link.group("prev")
+        new = new.replace(
+            link.group(0),
+            f"[Unreleased]: {base}{version}...HEAD\n[{version}]: {base}{prev}...{version}",
+            1,
+        )
+    else:
+        print("  CHANGELOG.md: no [Unreleased] compare link found; add the links by hand")
     return old, new, 1
 
 

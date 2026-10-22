@@ -29,6 +29,7 @@ All notable changes to this project are documented here. The format follows
   overdamped.
 
 ### Changed
+- `dialkit-compose` depends on Compose UI (`androidx.compose.ui:ui`), which `DialKitPanel` needs for `AndroidView`.
 - Declarations check their parameters: a slider needs finite values, `min < max` and a positive step, and curve
   defaults must be valid; otherwise they throw `IllegalArgumentException` at declaration.
 
@@ -48,3 +49,6 @@ First public release. Aligned with DialKit 2.0.2.
   toggles, segmented controls, the pad, colour tracks, folders and menus.
 - DialKit controller and root options: `setValues`, `getOpen` / `setOpen`, `DialPersist(key, presets)`,
   `entryPosition`, `defaultOpen`, `onOpenChange`.
+
+[Unreleased]: https://github.com/lixiaolin94/dialkit-android/compare/0.0.1...HEAD
+[0.0.1]: https://github.com/lixiaolin94/dialkit-android/releases/tag/0.0.1

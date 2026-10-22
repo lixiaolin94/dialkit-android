@@ -210,6 +210,7 @@ DialKit.configure {
     entryVisibleByDefault = true                            // show the entry on first launch, no gesture needed
     toggleGesture = ToggleGesture.ThreeFingerLongPress()    // or ToggleGesture.None
     keyShortcut = null                                      // turn off Ctrl+Shift+D
+    entryButton = false                                     // no entry button: open with DialKit.open() / setOpen(true)
     entryPosition = DialPosition.BottomEnd                  // where the entry first appears (default TopEnd)
     defaultOpen = true                                      // open the panel at launch when the entry is visible
     theme = DialTheme.Dark                                  // default: follow the system

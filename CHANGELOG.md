@@ -5,6 +5,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- `DialKitConfig.entryButton = false` hides the floating entry; the host opens the panel with `DialKit.open()` or
+  `setOpen(true)`, and closing it hides it.
+
 ### Fixed
 - Values from persistence, versions, Import, adb or `setValues` can no longer crash the host: non-finite numbers and
   invalid curves (negative durations, non-positive stiffness or mass, negative damping, bezier x outside 0..1) are
@@ -13,6 +17,10 @@ All notable changes to this project are documented here. The format follows
 - Moving the finger after a long press opened a slider's value input no longer drags the value underneath.
 - The spring curve and panel springs use a numerically stable form near critical damping and when heavily
   overdamped.
+
+### Changed
+- Declarations check their parameters: a slider needs finite values, `min < max` and a positive step, and curve
+  defaults must be valid; otherwise they throw `IllegalArgumentException` at declaration.
 
 ## [0.0.1] - 2026-10-21
 

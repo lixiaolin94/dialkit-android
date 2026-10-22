@@ -119,6 +119,7 @@ DialKit.configure {
     toggleGesture = ToggleGesture.ThreeFingerDoubleTap   // 默认；或 ThreeFingerLongPress(600) / None
     keyShortcut = KeyShortcut()                          // 默认 Ctrl+Shift+D；null 关闭
     entryVisibleByDefault = false                        // 首次安装时入口是否可见
+    entryButton = true                                   // false：不显示入口按钮，由宿主自己的 UI 打开面板（见下）
     haptics = true                                       // 触感反馈（Android 14+），见 §8.5
     entryPosition = DialPosition.TopEnd                  // 入口首次出现的角（DialKit position）；拖动过之后以拖动位置为准
     defaultOpen = false                                  // 入口可见时启动即展开（DialKit defaultOpen；DialKit 默认 true，Android 默认 false：手机上面板会盖住大半屏）
@@ -128,6 +129,7 @@ DialKit.configure {
 ```
 
 - **adb**：`adb shell am broadcast -a <applicationId>.dialkit.TOGGLE -p <applicationId> --es cmd <toggle|show|hide|open|close|import>`。`import` 另带 `--es json '<JSON>'`，可选 `--es id <面板 id>`。广播接收器在 API 33+ 以 `RECEIVER_EXPORTED` 注册。
+- **不显示入口**（`entryButton = false`，`DESIGN`，借鉴 dialkit-ios 的 `showsFAB: false`）：宿主用 `DialKit.open()` 或分组的 `setOpen(true)` 打开面板，面板直接从隐藏态展开（形变仍从入口的位置长出）；收起即完全隐藏。切换手势、快捷键和 adb `toggle` 改为直接开关面板，`showEntry()` 不起作用，`entryVisibleByDefault` 被忽略、也不记显隐状态，`defaultOpen` 仍然生效。
 - **代码**：`DialKit.showEntry()` / `hideEntry()` / `toggleEntry()` / `open()` / `close()`。
 - 入口显隐状态写入 SharedPreferences（`io.github.lixiaolin94.dialkit.overlay`），重启后保持。
 - 初始状态在第一个 Activity resume 时才确定（不是在 init provider 里），所以在 `Application.onCreate` 或启动 Activity 的 `onCreate` 里设置的启动选项都来得及；在那之前代码里显式调用过 show / hide / open 的，以调用为准。

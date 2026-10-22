@@ -76,9 +76,17 @@ internal object OverlayController {
         entryFraction = p.getFloat(KEY_ENTRY_FRACTION, if (bottom) 1f else 0f)
         pinnedHeightDp = p.getFloat(KEY_PANEL_HEIGHT, -1f).takeIf { it > 0f }
         if (explicit) return
+        if (!hasEntry) {
+            // No entry to restore: start closed unless the host asked for the panel to open at launch.
+            transitionTo(if (config.defaultOpen) OverlayMode.Expanded else OverlayMode.Hidden)
+            return
+        }
         val visible = p.getBoolean(KEY_ENTRY_VISIBLE, config.entryVisibleByDefault)
         transitionTo(if (!visible) OverlayMode.Hidden else if (config.defaultOpen) OverlayMode.Expanded else OverlayMode.Entry)
     }
+
+    /** False when the host hides the entry button ([DialKitConfig.entryButton]); collapsing then hides everything. */
+    private val hasEntry: Boolean get() = config?.entryButton != false
 
     fun addListener(listener: (OverlayMode) -> Unit) {
         listeners += listener
@@ -88,21 +96,27 @@ internal object OverlayController {
         listeners -= listener
     }
 
-    fun transitionTo(next: OverlayMode) {
+    fun transitionTo(requested: OverlayMode) {
         resolve(explicit = true)
+        val next = if (requested == OverlayMode.Entry && !hasEntry) OverlayMode.Hidden else requested
         if (mode == next) return
         val previous = mode
         val wasVisible = mode != OverlayMode.Hidden
         mode = next
         val visible = next != OverlayMode.Hidden
-        if (wasVisible != visible) prefs?.edit()?.putBoolean(KEY_ENTRY_VISIBLE, visible)?.apply()
+        if (wasVisible != visible && hasEntry) prefs?.edit()?.putBoolean(KEY_ENTRY_VISIBLE, visible)?.apply()
         listeners.forEach { it(next) }
         if ((previous == OverlayMode.Expanded) != (next == OverlayMode.Expanded)) {
             config?.onOpenChange?.invoke(next == OverlayMode.Expanded)
         }
     }
 
-    fun toggleEntry() = transitionTo(if (mode == OverlayMode.Hidden) OverlayMode.Entry else OverlayMode.Hidden)
+    /** The toggle gesture, shortcut and adb toggle; without an entry button they open and close the panel itself. */
+    fun toggleEntry() = when {
+        mode != OverlayMode.Hidden -> transitionTo(OverlayMode.Hidden)
+        hasEntry -> transitionTo(OverlayMode.Entry)
+        else -> transitionTo(OverlayMode.Expanded)
+    }
 
     fun expand() {
         if (mode == OverlayMode.Entry) transitionTo(OverlayMode.Expanded)
@@ -116,8 +130,12 @@ internal object OverlayController {
         if (backHandler?.invoke() != true) collapse()
     }
 
-    /** Shows the entry if needed and expands. */
+    /** Shows the entry if needed and expands (straight from hidden when there is no entry button). */
     fun reveal() {
+        if (!hasEntry) {
+            transitionTo(OverlayMode.Expanded)
+            return
+        }
         if (mode == OverlayMode.Hidden) transitionTo(OverlayMode.Entry)
         expand()
     }

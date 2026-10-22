@@ -210,6 +210,7 @@ DialKit.configure {
     entryVisibleByDefault = true                            // 首次启动就显示入口，不用手势
     toggleGesture = ToggleGesture.ThreeFingerLongPress()    // 或 ToggleGesture.None
     keyShortcut = null                                      // 关闭 Ctrl+Shift+D
+    entryButton = false                                     // 不显示入口按钮：用 DialKit.open() / setOpen(true) 打开
     entryPosition = DialPosition.BottomEnd                  // 入口首次出现的位置（默认 TopEnd）
     defaultOpen = true                                      // 入口可见时，启动就展开面板
     theme = DialTheme.Dark                                  // 默认跟随系统

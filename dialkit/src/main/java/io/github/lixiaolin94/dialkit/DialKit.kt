@@ -64,7 +64,7 @@ public object DialKit {
     public fun hideEntry(): Unit = OverlayController.transitionTo(OverlayMode.Hidden)
     public fun toggleEntry(): Unit = OverlayController.toggleEntry()
 
-    /** Expands the panel, showing the entry first if needed. */
+    /** Expands the panel, showing the entry first if needed (or directly, with `entryButton = false`). */
     public fun open(): Unit = OverlayController.reveal()
 
     public fun close(): Unit = OverlayController.collapse()

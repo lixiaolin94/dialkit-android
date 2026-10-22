@@ -14,6 +14,15 @@ public class DialKitConfig internal constructor() {
     public var entryVisibleByDefault: Boolean = false
 
     /**
+     * Whether DialKit shows its floating entry button. With false (DESIGN, after the dialkit-ios port's
+     * `showsFAB: false`) the host opens the panel from its own UI with [DialKit.open] or a group's `setOpen(true)`;
+     * closing it hides it completely, the toggle gesture / shortcut / adb toggle open and close the panel itself,
+     * and [DialKit.showEntry] does nothing. [entryVisibleByDefault] is then ignored; [defaultOpen] still opens the
+     * panel at launch.
+     */
+    public var entryButton: Boolean = true
+
+    /**
      * Corner the entry first appears in (DialKit `position`, default top-right). After the entry has been
      * dragged, its last spot wins.
      */

@@ -100,6 +100,33 @@ internal object DialStore {
     private const val PREFS = "io.github.lixiaolin94.dialkit.values"
 
     val panels = DialCell<List<DialPanel>>(emptyList())
+
+    /**
+     * DESIGN: what the floating overlay lists — registered panels that are not currently shown inside a page
+     * (`DialPanelView`). A group tuned in its own screen is not offered a second time in the overlay.
+     */
+    val floating = DialCell<List<DialPanel>>(emptyList())
+
+    /** Page-embedded views per panel; a screen may show the same group in more than one view. */
+    private val embedded = HashMap<DialPanel, Int>()
+
+    private fun refreshFloating() {
+        floating.value = panels.peek.filter { it !in embedded }
+    }
+
+    fun isEmbedded(panel: DialPanel) = panel in embedded
+
+    /** A page view started showing [panel]; it leaves the overlay while any such view is attached. */
+    fun embed(panel: DialPanel) {
+        embedded[panel] = (embedded[panel] ?: 0) + 1
+        refreshFloating()
+    }
+
+    fun unembed(panel: DialPanel) {
+        val n = (embedded[panel] ?: return) - 1
+        if (n > 0) embedded[panel] = n else embedded -= panel
+        refreshFloating()
+    }
     private val retained = HashMap<String, RetainedState>()
     private var prefs: SharedPreferences? = null
     private var appContext: Context? = null
@@ -129,13 +156,19 @@ internal object DialStore {
         val panel = DialPanel(id, name, group, !defaultCollapsed, persist, group.persistedValues())
         group.resetHook = { reset(panel) }
         group.openHook = object : OpenHook {
-            override fun isOpen() = if (panels.peek.size <= 1) OverlayController.mode == OverlayMode.Expanded else panel.open.value
+            // DESIGN: a group shown inside a page is always open there, and the overlay has nothing to open.
+            override fun isOpen() = when {
+                panel in embedded -> true
+                floating.peek.size <= 1 -> OverlayController.mode == OverlayMode.Expanded
+                else -> panel.open.value
+            }
 
             // SOURCE DialRoot subscribePanelOpen: the only panel opens / closes the shell; with several, opening
             // a section also opens the shell.
             override fun setOpen(open: Boolean) {
+                if (panel in embedded) return
                 panel.open.value = open
-                if (panels.peek.size <= 1) {
+                if (floating.peek.size <= 1) {
                     if (open) OverlayController.reveal() else OverlayController.collapse()
                 } else if (open) {
                     OverlayController.reveal()
@@ -155,6 +188,7 @@ internal object DialStore {
         panel.mounts = 1
         group.valueCells().forEach { cell -> DialCells.own(cell) { markDirty(panel) } }
         panels.value = panels.value + panel
+        refreshFloating()
         return panel
     }
 
@@ -163,6 +197,7 @@ internal object DialStore {
         if (panel.mounts > 0) return
         flush(panel)
         panels.value = panels.value - panel
+        refreshFloating()
         panel.group.openHook = null
         panel.group.valueCells().forEach(DialCells::disown)
         retained[panel.id] = RetainedState(panel.group.persistedValues(), panel.baseValues, panel.presets.value, panel.activePresetId)

@@ -76,12 +76,12 @@ internal class PanelView(private val ui: DialUi) : LinearLayout(ui.context) {
         body.addView(content, LayoutParams(MATCH, WRAP))
         addView(body, llp(MATCH, 0, 1f))
         addView(View(context), llp(MATCH, dp(10)))
-        render(DialStore.panels.value)
+        render(DialStore.floating.value)
         whileAttached {
             // Panels may (un)register between construction and attach (a Compose host registers on its first
-            // frame, after onResume), so sync before listening.
-            if (renderedFor != DialStore.panels.value) render(DialStore.panels.value)
-            DialStore.panels.listen { render(it) }
+            // frame, after onResume), so sync before listening. Panels shown inside a page are left out.
+            if (renderedFor != DialStore.floating.value) render(DialStore.floating.value)
+            DialStore.floating.listen { render(it) }
         }
     }
 

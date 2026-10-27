@@ -7,6 +7,8 @@ import android.graphics.Canvas
 import android.graphics.Outline
 import android.graphics.Paint
 import android.graphics.RectF
+import android.os.Handler
+import android.os.Looper
 import android.view.Choreographer
 import android.view.MotionEvent
 import android.view.VelocityTracker
@@ -90,6 +92,9 @@ internal class OverlayRoot(
     private var naturalHeight = 0
     private var panelReady = false
     private var pendingExpand = false
+    // Not post(): a view's own queue only runs once it is attached, so it cannot time out a view that never is.
+    private val main = Handler(Looper.getMainLooper())
+    private val readyTimeout = Runnable { onReadyTimeout() }
 
     // ---- geometry, recomputed on layout
     private var winW = 0f
@@ -153,16 +158,18 @@ internal class OverlayRoot(
             }
             OverlayMode.Expanded -> {
                 container.isFocusable = false
+                layer.panelOpen = false
                 scrim.visibility = VISIBLE
                 grabber.visibility = VISIBLE
                 appear.animateTo(1f, timeSpring(0.3f, 0.2f))
                 if (panelReady) {
-                    progress.animateTo(1f, timeSpring(0.3f, 0.1f), onEnd = ::announceLayout)
+                    openPanel()
                 } else {
                     // DESIGN (user): build first, wait for its first layout + two frames, then morph in one go.
                     pendingExpand = true
                     buildPanel()
-                    postDelayed({ startPendingExpand() }, READY_TIMEOUT_MS)
+                    main.removeCallbacks(readyTimeout)
+                    main.postDelayed(readyTimeout, READY_TIMEOUT_MS)
                 }
             }
         }
@@ -171,7 +178,31 @@ internal class OverlayRoot(
     private fun startPendingExpand() {
         if (!pendingExpand || OverlayController.mode != OverlayMode.Expanded) return
         pendingExpand = false
+        main.removeCallbacks(readyTimeout)
+        openPanel()
+    }
+
+    private fun openPanel() {
+        layer.panelOpen = true
         progress.animateTo(1f, timeSpring(0.3f, 0.1f), onEnd = ::announceLayout)
+    }
+
+    /** Morph anyway if the overlay is in a window; otherwise it can never show, so give the host back its screen. */
+    private fun onReadyTimeout() {
+        if (!pendingExpand || OverlayController.mode != OverlayMode.Expanded) return
+        if (isAttachedToWindow) {
+            startPendingExpand()
+        } else {
+            pendingExpand = false
+            OverlayController.collapse()
+        }
+    }
+
+    /** The attachment dropped this root: cancel the expand timeout so it cannot act for a gone overlay. */
+    fun release() {
+        pendingExpand = false
+        main.removeCallbacks(readyTimeout)
+        layer.panelOpen = false
     }
 
     /**
@@ -184,6 +215,8 @@ internal class OverlayRoot(
 
     private fun collapseUi() {
         pendingExpand = false
+        main.removeCallbacks(readyTimeout)
+        layer.panelOpen = false
         popups.dismiss()
         findFocus()?.let { focused ->
             (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(focused.windowToken, 0)

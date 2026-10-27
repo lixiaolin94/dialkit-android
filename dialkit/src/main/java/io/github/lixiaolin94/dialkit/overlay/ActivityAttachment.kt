@@ -18,24 +18,34 @@ internal class ActivityAttachment(private val activity: Activity, private val co
     private val modeListener: (OverlayMode) -> Unit = { onModeChanged(it) }
 
     fun attach() {
-        val decor = activity.window.decorView as ViewGroup
-        when {
-            layer.parent == null -> decor.addView(
-                layer,
-                ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT),
-            )
-            decor.getChildAt(decor.childCount - 1) !== layer -> layer.bringToFront()
-        }
+        placeLayer()
         installCallback()
         OverlayController.removeListener(modeListener)
         OverlayController.addListener(modeListener)
         onModeChanged(OverlayController.mode)
     }
 
+    /**
+     * Keeps the layer the last child of the current DecorView. A parent alone is not proof it is in the window:
+     * re-add it when it hangs off another view, or when the DecorView is attached but the layer is not. On first
+     * resume the DecorView itself is not attached yet; it attaches the layer when the window is added.
+     */
+    private fun placeLayer() {
+        val decor = activity.window.decorView as ViewGroup
+        val stale = layer.parent !== decor || (decor.isAttachedToWindow && !layer.isAttachedToWindow)
+        if (stale) {
+            (layer.parent as? ViewGroup)?.removeView(layer)
+            decor.addView(layer, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        } else if (decor.getChildAt(decor.childCount - 1) !== layer) {
+            layer.bringToFront()
+        }
+    }
+
     fun detach() {
         OverlayController.removeListener(modeListener)
         unregisterBack()
         (layer.parent as? ViewGroup)?.removeView(layer)
+        root?.release()
         root = null
     }
 
@@ -51,6 +61,7 @@ internal class ActivityAttachment(private val activity: Activity, private val co
     }
 
     private fun onModeChanged(mode: OverlayMode) {
+        if (mode != OverlayMode.Hidden) placeLayer()
         if (mode != OverlayMode.Hidden && root == null) {
             root = OverlayRoot(activity, layer, config, onHiddenSettled = ::removeRoot).also {
                 layer.addView(it, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))

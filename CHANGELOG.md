@@ -5,6 +5,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+- The floating overlay no longer blocks the host's touches when its view is not attached to the window. It
+  takes the whole screen only once the panel starts opening, the expand timeout no longer depends on the view
+  being attached, and an expand that cannot show falls back to the entry button.
+
 ## [0.0.2] - 2026-10-22
 
 ### Added

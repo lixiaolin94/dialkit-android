@@ -38,8 +38,9 @@ internal data class OverlayInsets(
 
 /**
  * Full-window layer appended to the Activity's DecorView. It only takes touches the overlay needs: none while
- * hidden, the entry button's bounds while collapsed, everything while expanded (a tap outside the panel
- * collapses it and is not passed to the host).
+ * hidden or not attached to a window, the entry button's bounds while collapsed, everything once the panel is
+ * opening (a tap outside the panel collapses it and is not passed to the host). While an expand still waits for
+ * the panel's first frames it takes nothing, so a panel that never shows cannot block the host.
  *
  * Insets are read from getRootWindowInsets on every layout: below API 30 a sibling that consumes insets
  * (fitsSystemWindows content) stops dispatch before it reaches this last child.
@@ -49,6 +50,8 @@ internal class DialKitLayer(context: Context) : FrameLayout(context) {
     val entryBounds = Rect()
     var insets = OverlayInsets()
         private set
+    /** Set by the overlay root once the panel starts opening; until then an expanded overlay takes no touches. */
+    var panelOpen = false
     private var accepting = false
 
     init {
@@ -80,10 +83,12 @@ internal class DialKitLayer(context: Context) : FrameLayout(context) {
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-            accepting = when (OverlayController.mode) {
+            // A parent dispatches to every child, attached or not; a layer the window never draws must not
+            // swallow the host's touches.
+            accepting = isAttachedToWindow && when (OverlayController.mode) {
                 OverlayMode.Hidden -> false
                 OverlayMode.Entry -> entryBounds.contains(event.x.toInt(), event.y.toInt())
-                OverlayMode.Expanded -> true
+                OverlayMode.Expanded -> panelOpen
             }
         }
         if (!accepting) return false
